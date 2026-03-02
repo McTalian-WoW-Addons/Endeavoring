@@ -26,9 +26,9 @@
   "author": "Rob Anderson \"McTalian\" <McTalian@users.noreply.github.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Mctalian/Endeavoring/issues"
+    "url": "https://github.com/Mctalian-WoW-Addons/Endeavoring/issues"
   },
-  "homepage": "https://github.com/Mctalian/Endeavoring#readme",
+  "homepage": "https://github.com/Mctalian-WoW-Addons/Endeavoring#readme",
   "devDependencies": {
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/github": "^12.0.3",
