@@ -26,7 +26,7 @@ Install directly through your favorite addon manager:
 
 ### Manual Install
 
-1. Download the latest release from [GitHub Releases](https://github.com/McTalian/Endeavoring/releases), [CurseForge](https://www.curseforge.com/wow/addons/endeavoring), [WoWInterface](https://www.wowinterface.com/downloads/info27047-Endeavoring.html), or [Wago](https://addons.wago.io/addons/endeavoring)
+1. Download the latest release from [GitHub Releases](https://github.com/McTalian-WoW-Addons/Endeavoring/releases), [CurseForge](https://www.curseforge.com/wow/addons/endeavoring), [WoWInterface](https://www.wowinterface.com/downloads/info27047-Endeavoring.html), or [Wago](https://addons.wago.io/addons/endeavoring)
 2. Extract to `World of Warcraft/_retail_/Interface/AddOns/`
 3. Make sure the folder is named `Endeavoring`
 4. Restart WoW or `/reload`
@@ -61,7 +61,7 @@ Install directly through your favorite addon manager:
 
 ## Support & Bugs
 
-- **GitHub:** [McTalian/Endeavoring](https://github.com/McTalian/Endeavoring)
+- **GitHub:** [McTalian-WoW-Addons/Endeavoring](https://github.com/McTalian-WoW-Addons/Endeavoring)
 - **Discord:** [Join here](https://discord.gg/czRYVWhe33)
 
 Found a bug? Open an issue on GitHub or ping me on Discord. Include any error messages from BugSnag/BugGrabber or `/console scriptErrors 1` if you can.

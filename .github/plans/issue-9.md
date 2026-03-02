@@ -1,6 +1,6 @@
 # Feature Plan: Gossip Protocol v2 — Digest-based Exchange + Short Wire Keys
 
-**Issue**: [#9 - Overly eager gossip protocol](https://github.com/McTalian/Endeavoring/issues/9)
+**Issue**: [#9 - Overly eager gossip protocol](https://github.com/McTalian-WoW-Addons/Endeavoring/issues/9)
 **Created**: February 27, 2026
 
 ## Overview

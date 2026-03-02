@@ -26,7 +26,7 @@ jobs:
       - name: Package and distribute
         env:
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-        uses: McTalian/wow-build-tools@v1-beta
+        uses: McTalian-WoW-Addons/wow-build-tools@v1-beta
         with:
           args: -t ./Endeavoring -r ./.release
 
@@ -43,17 +43,17 @@ jobs:
         with:
           webhook-url: ${{ env.DISCORD_WEBHOOK_URL }}
           username: Endeavoring Releases
-          avatar-url: https://raw.githubusercontent.com/McTalian/Endeavoring/refs/heads/main/Endeavoring/Icons/endeavoring.png
+          avatar-url: https://raw.githubusercontent.com/McTalian-WoW-Addons/Endeavoring/refs/heads/main/Endeavoring/Icons/endeavoring.png
           embed-title: "New Endeavoring Release: ${{ github.event.release.tag_name || ':tada:' }}"
           embed-description: |
             ${{ github.event.release.body || '' }}
 
-            Be the first to download via :octopus: [GitHub](${{ github.event.release.html_url || 'https://github.com/McTalian/Endeavoring/releases' }}) :coin:
+            Be the first to download via :octopus: [GitHub](${{ github.event.release.html_url || 'https://github.com/McTalian-WoW-Addons/Endeavoring/releases' }}) :coin:
 
             Once approved it will also be available via:
             * :fire: [CurseForge](https://www.curseforge.com/wow/addons/endeavoring)
             * :wireless: [WoWInterface](https://www.wowinterface.com/downloads/info27047-Endeavoring.html)
             * :knot: [Wago](https://addons.wago.io/addons/endeavoring)
 
-            > _**Running into issues?** Let me know on [GitHub](https://github.com/McTalian/Endeavoring/issues) or join the [Discord](https://discord.gg/czRYVWhe33) for the fastest updates and support!_
+            > _**Running into issues?** Let me know on [GitHub](https://github.com/McTalian-WoW-Addons/Endeavoring/issues) or join the [Discord](https://discord.gg/czRYVWhe33) for the fastest updates and support!_
           embed-color: 15105570

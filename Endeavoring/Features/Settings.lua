@@ -278,7 +278,7 @@ StaticPopupDialogs["ENDEAVORING_ABOUT"] = {
 	       "Addon icon by Delapouite (delapouite.com)\n" ..
 	       "Licensed under CC BY 3.0\n" ..
 	       "Modified and downloaded via game-icons.net\n\n" ..
-	       "|cFF888888GitHub:|r github.com/McTalian/Endeavoring\n" ..
+	       "|cFF888888GitHub:|r github.com/McTalian-WoW-Addons/Endeavoring\n" ..
 	       "|cFF888888Discord:|r discord.gg/czRYVWhe33",
 	button1 = "Close",
 	timeout = 0,
