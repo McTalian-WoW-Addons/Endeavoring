@@ -5,7 +5,7 @@
 ## Notes: Improvements to the Endeavors frame for your Neighborhood.
 ## SavedVariables: EndeavoringDB
 ## IconTexture: Interface/AddOns/Endeavoring/Icons/endeavoring.png
-## X-GitHub: https://github.com/McTalian/Endeavoring
+## X-GitHub: https://github.com/Mctalian-WoW-Addons/Endeavoring
 ## X-Discord: https://discord.gg/czRYVWhe33
 ## X-Curse-Project-ID: 1461872
 ## X-WoWI-ID: 27047
