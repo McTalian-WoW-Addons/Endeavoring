@@ -15,10 +15,10 @@ You are collaborating with the user to plan a feature from a GitHub issue. Your 
 **This workflow requires a GitHub issue number.**
 
 - Extract issue number from formats like: `#123`, `123`, `issue 123`
-- If no issue number provided, ask: "Please provide an issue number to plan (e.g., `/plan #123`). Create an issue first at https://github.com/McTalian/Endeavoring/issues/new/choose"
+- If no issue number provided, ask: "Please provide an issue number to plan (e.g., `/plan #123`). Create an issue first at https://github.com/McTalian-WoW-Addons/Endeavoring/issues/new/choose"
 
 **Fetch the issue**:
-1. Call: `github-pull-request_issue_fetch(owner: "McTalian", repo: "Endeavoring", issue_number: 123)`
+1. Call: `github-pull-request_issue_fetch(owner: "McTalian-WoW-Addons", repo: "Endeavoring", issue_number: 123)`
 2. Extract key information:
    - Issue title and description
    - Labels (complexity, priority indicators)
@@ -295,7 +295,7 @@ Midnight is new - APIs might change:
 → Loads issue #42, creates detailed implementation plan, saves to `.github/plans/issue-42.md`
 
 **Typical workflow**:
-1. Create issue: https://github.com/McTalian/Endeavoring/issues/new/choose
+1. Create issue: https://github.com/McTalian-WoW-Addons/Endeavoring/issues/new/choose
 2. Run `/plan #123` to create technical design
 3. Plan is saved for `/implement #123` to reference
 4. Update development-status.md with planned work

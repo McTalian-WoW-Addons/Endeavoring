@@ -21,7 +21,7 @@
 - **Next idea**: Load-order test to cover module-level initialization code not wrapped in functions
 
 **Gossip Protocol v2 — Digest-Based Exchange (Feb 27 AM)** ✅
-- **Issue**: [#9 - Overly eager gossip protocol](https://github.com/McTalian/Endeavoring/issues/9)
+- **Issue**: [#9 - Overly eager gossip protocol](https://github.com/McTalian-WoW-Addons/Endeavoring/issues/9)
 - **Problem**: Old gossip sent 3-15+ unsolicited whisper messages per MANIFEST received, causing `AddonMessageThrottle` errors in active guilds
 - **Solution**: Replaced push-based gossip with digest-based handshake protocol
 - **Phase 1** ✅: Switched all senders to short wire keys (`ns.SK`), saving ~30-50 bytes per message

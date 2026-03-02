@@ -19,7 +19,7 @@ You are implementing a feature or enhancement based on a GitHub issue. This work
 - If no number provided, ask the user which issue to implement
 
 **Fetch the issue** using GitHub tools:
-1. Fetch issue content: `github-pull-request_issue_fetch(owner: "McTalian", repo: "Endeavoring", issue_number: 123)`
+1. Fetch issue content: `github-pull-request_issue_fetch(owner: "McTalian-WoW-Addons", repo: "Endeavoring", issue_number: 123)`
 2. Extract key information:
    - Issue title and description
    - Labels (complexity, priority indicators)

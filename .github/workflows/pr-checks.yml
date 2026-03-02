@@ -107,7 +107,7 @@ jobs:
           fi
 
       - name: Package
-        uses: McTalian/wow-build-tools@v1-beta
+        uses: McTalian-WoW-Addons/wow-build-tools@v1-beta
         with:
           args: -d -t ./Endeavoring -r ./.release --skipChangelog -n {package-name}-pr${{github.event.number}}-{nolib}{classic}
 
