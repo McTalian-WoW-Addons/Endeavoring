@@ -31,6 +31,12 @@ INVALIDATION:
 
 local DebugPrint = ns.DebugPrint
 
+-- Guard to prevent re-entrant stale cache refresh requests.
+-- When stale data triggers RequestInitiativeInfo, the event response can
+-- synchronously fire NEIGHBORHOOD_INITIATIVE_UPDATED → RequestActivityLog →
+-- INITIATIVE_ACTIVITY_LOG_UPDATED → Get() again, creating an infinite cycle.
+local staleRefreshPending = false
+
 --- Get activity log info with caching support
 --- Returns cached data immediately if available, schedules background update
 --- @return table|nil activityLogInfo The activity log info (cached or live)
@@ -50,14 +56,19 @@ function ActivityLogCache.Get()
 	if liveData and liveData.isLoaded and #liveData.taskActivity > 0 then
 		-- Live data is loaded, update cache and return it
 		ns.DB.SetActivityLogCache(neighborhoodGUID, liveData)
+		staleRefreshPending = false
 		return liveData
 	end
 	
 	-- Live data not loaded yet, try to return cached data
 	local cachedData, isStale = ns.DB.GetActivityLogCache(neighborhoodGUID)
 	if cachedData then
-		if isStale then
-			ns.API.RequestInitiativeInfo() -- Request update so we'll get updated whenever Blizzard decides to send it
+		if isStale and not staleRefreshPending then
+			-- Defer the request to next frame to break any synchronous event cycle
+			staleRefreshPending = true
+			C_Timer.After(0, function()
+				ns.API.RequestInitiativeInfo()
+			end)
 		end
 		
 		return cachedData
