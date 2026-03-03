@@ -687,11 +687,13 @@ function Activity.CreateTab(parent)
 	emptyText:Hide()
 	content.emptyText = emptyText
 
-	-- Register for activity log updates
+	-- Register for activity log updates (only refresh when visible)
 	local eventFrame = CreateFrame("Frame")
 	eventFrame:RegisterEvent("INITIATIVE_ACTIVITY_LOG_UPDATED")
 	eventFrame:SetScript("OnEvent", function()
-		Activity.Refresh()
+		if content:IsVisible() then
+			Activity.Refresh()
+		end
 	end)
 	content.eventFrame = eventFrame
 

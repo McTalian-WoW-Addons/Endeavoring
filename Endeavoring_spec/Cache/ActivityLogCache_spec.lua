@@ -81,9 +81,64 @@ describe("ActivityLogCache", function()
 			local requestCalled = false
 			ns.API.RequestInitiativeInfo = function() requestCalled = true end
 
+			-- Make C_Timer.After execute callback immediately for testing
+			_G.C_Timer.After = function(_, callback) callback() end
+
 			local result = Cache.Get()
 			assert.are.equal(cachedData, result)
 			assert.is_true(requestCalled) -- Should trigger background update
+		end)
+
+		it("should not re-request when stale refresh is already pending", function()
+			local ns, Cache = SetupActivityLogCache()
+
+			ns.API.GetActivityLogInfo = function() return nil end
+			ns.API.GetActiveNeighborhoodGUID = function() return "GUID-1" end
+
+			local cachedData = { isLoaded = true, taskActivity = { { taskID = 1 } } }
+			ns.DB.GetActivityLogCache = function() return cachedData, true end
+
+			local requestCount = 0
+			ns.API.RequestInitiativeInfo = function() requestCount = requestCount + 1 end
+
+			-- Don't execute callback so the guard stays pending
+			_G.C_Timer.After = function(_, _) end
+
+			Cache.Get() -- First call sets staleRefreshPending
+			Cache.Get() -- Second call should skip request
+
+			assert.are.equal(0, requestCount) -- Deferred, not called yet
+		end)
+
+		it("should allow re-request after live data clears the guard", function()
+			local ns, Cache = SetupActivityLogCache()
+
+			ns.API.GetActiveNeighborhoodGUID = function() return "GUID-1" end
+
+			local cachedData = { isLoaded = true, taskActivity = { { taskID = 1 } } }
+			ns.DB.GetActivityLogCache = function() return cachedData, true end
+
+			local requestCount = 0
+			ns.API.RequestInitiativeInfo = function() requestCount = requestCount + 1 end
+
+			-- Don't execute callback so the guard stays pending
+			_G.C_Timer.After = function(_, _) end
+			ns.API.GetActivityLogInfo = function() return nil end
+
+			Cache.Get() -- Sets staleRefreshPending
+
+			-- Now simulate live data arriving (clears the guard)
+			local liveData = { isLoaded = true, taskActivity = { { taskID = 2 } } }
+			ns.API.GetActivityLogInfo = function() return liveData end
+			ns.DB.SetActivityLogCache = function() end
+			Cache.Get() -- Should clear guard via live data path
+
+			-- Back to stale state
+			ns.API.GetActivityLogInfo = function() return nil end
+			_G.C_Timer.After = function(_, callback) callback() end
+			Cache.Get() -- Should request again since guard was cleared
+
+			assert.are.equal(1, requestCount)
 		end)
 
 		it("should return live data when no neighborhood GUID available", function()

@@ -595,10 +595,10 @@ function Leaderboard.CreateTab(parent)
 	emptyText:SetText(constants.NO_LEADERBOARD_DATA)
 	emptyText:Hide()
 
-	-- Register event handler for activity log updates
+	-- Register event handler for activity log updates (only refresh when visible)
 	content:RegisterEvent("INITIATIVE_ACTIVITY_LOG_UPDATED")
 	content:SetScript("OnEvent", function(self, event)
-		if event == "INITIATIVE_ACTIVITY_LOG_UPDATED" then
+		if event == "INITIATIVE_ACTIVITY_LOG_UPDATED" and self:IsVisible() then
 			UpdateLeaderboardDisplay()
 		end
 	end)
