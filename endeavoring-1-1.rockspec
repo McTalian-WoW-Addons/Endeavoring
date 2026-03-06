@@ -1,7 +1,7 @@
 package = "endeavoring"
 version = "1-1"
 source = {
-   url = "git+https://github.com/Mctalian-WoW-Addons/Endeavoring.git"
+   url = "git+https://github.com/McTalian-WoW-Addons/Endeavoring.git"
 }
 dependencies = {
    "lua >= 5.3",
