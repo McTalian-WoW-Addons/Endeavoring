@@ -111,7 +111,11 @@ local function CreateMainFrame()
 	InitializeTabSystem(frame)
 	frame:SetScript("OnShow", function()
 		ns.API.RequestInitiativeInfo()
-		ns.API.RequestActivityLog()
+		-- Note: RequestActivityLog() is intentionally NOT called here directly.
+		-- The NEIGHBORHOOD_INITIATIVE_UPDATED handler calls it after the initiative
+		-- info response arrives. This sequential pattern (matching Blizzard's own
+		-- Housing Dashboard) gives the server time to fully aggregate the activity
+		-- log before we request it, avoiding partial responses.
 		RefreshInitiativeUI()
 	end)
 
