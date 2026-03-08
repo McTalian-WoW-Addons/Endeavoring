@@ -619,6 +619,11 @@ function Leaderboard.CreateTab(parent)
 	UpdateFilterButtons()
 	UpdateSortHeader()  -- Initialize sort indicators
 
+	-- Refresh display whenever this tab becomes visible (handles initial show and tab switches)
+	content:SetScript("OnShow", function()
+		UpdateLeaderboardDisplay()
+	end)
+
 	content:Hide()
 	return content
 end

@@ -700,6 +700,11 @@ function Activity.CreateTab(parent)
 	-- Initialize sort indicators
 	UpdateSortHeader(content)
 
+	-- Refresh display whenever this tab becomes visible (handles initial show and tab switches)
+	content:SetScript("OnShow", function()
+		Activity.Refresh()
+	end)
+
 	-- Store reference
 	ns.ui.activityContent = content
 
