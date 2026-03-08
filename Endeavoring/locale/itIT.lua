@@ -1,0 +1,88 @@
+--@strip-comments@
+---@type string
+local addonName = select(1, ...)
+---@class Ndvrng_NS
+local ns = select(2, ...)
+
+if GetLocale() ~= "itIT" then return end
+
+---@class Ndvrng_Locale
+local L = ns.L
+
+--- Place newest translations/locale keys at the top, wrapped in --#region and
+--- --#endregion for the version number that they were added in.
+--- You may translate these comments, but do not translate "region" or "endregion"
+--- as they are used by the localization tool to determine where to place the translations.
+--- To add translations, simply uncomment the line(s) and replace the English text
+--- after the equal sign (=) with the translated value.
+
+--#region v1.3.0
+-- L["1 day ago"] = "1 day ago"
+-- L["1 Hour"] = "1 Hour"
+-- L["12 Hours"] = "12 Hours"
+-- L["24 Hours"] = "24 Hours"
+-- L["6 Hours"] = "6 Hours"
+-- L["7 Days"] = "7 Days"
+-- L["<Endeavoring User>"] = "<Endeavoring User>"
+-- L["About"] = "About"
+-- L["Activity"] = "Activity"
+-- L["Change Player Alias"] = "Change Player Alias"
+-- L["Character (Account)"] = "Character (Account)"
+-- L["Contributing Characters:"] = "Contributing Characters:"
+-- L["Contribution"] = "Contribution"
+-- L["Contributions show as 0 after an Endeavor is completed."] = "Contributions show as 0 after an Endeavor is completed."
+-- L["Coupons"] = "Coupons"
+-- L["Current Endeavor"] = "Current Endeavor"
+-- L["Debug"] = "Debug"
+-- L["Default Tab"] = "Default Tab"
+-- L["DLG_AliasPromptText"] = "Set your player alias for Endeavoring.\n\nThis name will appear in leaderboards and activity logs instead of your BattleTag.\n\nCurrent alias: %s"
+-- L["Enable Debug Logs"] = "Enable Debug Logs"
+-- L["Endeavor Chest Ready!"] = "Endeavor Chest Ready!"
+-- L["Endeavor Complete"] = "Endeavor Complete"
+-- L["FMT_DaysAgo"] = "%d days ago"
+-- L["FMT_HoursAgo"] = "%dh ago"
+-- L["FMT_MilestoneLabel"] = "Milestone %d  %d%%"
+-- L["FMT_MilestoneProgressRequired"] = "Progress Required: %d"
+-- L["FMT_MilestoneTooltipTitle"] = "Milestone %d"
+-- L["FMT_MinutesAgo"] = "%dm ago"
+-- L["General"] = "General"
+-- L["House XP"] = "House XP"
+-- L["Just now"] = "Just now"
+-- L["Leaderboard"] = "Leaderboard"
+-- L["Loading activity data..."] = "Loading activity data..."
+-- L["Loading activity log..."] = "Loading activity log..."
+-- L["MSG_DebugDisabled"] = "Debug mode disabled."
+-- L["MSG_DebugEnabled"] = "Debug mode enabled. Use /chatlog to stream logs to a file."
+-- L["MSG_SettingsNotReady"] = "Settings not yet initialized. Please try again in a moment."
+-- L["My Characters Only"] = "My Characters Only"
+-- L["No active endeavor"] = "No active endeavor"
+-- L["No activity found for your characters"] = "No activity found for your characters"
+-- L["No activity recorded"] = "No activity recorded"
+-- L["No task data, try opening the housing dashboard"] = "No task data, try opening the housing dashboard"
+-- L["No tasks available"] = "No tasks available"
+-- L["Open Endeavoring settings panel"] = "Open Endeavoring settings panel"
+-- L["Player"] = "Player"
+-- L["Player Alias"] = "Player Alias"
+-- L["Rank"] = "Rank"
+-- L["Remember Last Tab"] = "Remember Last Tab"
+-- L["Rewards:"] = "Rewards:"
+-- L["Set Alias"] = "Set Alias"
+-- L["Settings"] = "Settings"
+-- L["Shift-click to track task"] = "Shift-click to track task"
+-- L["Task"] = "Task"
+-- L["Tasks"] = "Tasks"
+-- L["Tasks Completed"] = "Tasks Completed"
+-- L["Time"] = "Time"
+-- L["Time Remaining: --"] = "Time Remaining: --"
+-- L["TIP_ChangeAlias"] = "Set a custom display name for leaderboards and activity logs"
+-- L["TIP_ChestAutoDismiss"] = "Will dismiss automatically when you open the chest."
+-- L["TIP_ChestExperimental"] = "This is an experimental feature and may not work as expected."
+-- L["TIP_ChestIndicator"] = "Visit the chest next to the neighborhood bulletin board to claim your reward."
+-- L["TIP_ChestRightClick"] = "Right-click to dismiss manually."
+-- L["TIP_DefaultTab"] = "Which tab to open when 'Remember Last Tab' is disabled. This setting is ignored when remembering your last tab."
+-- L["TIP_EnableDebugLogs"] = "Show detailed debug information in chat to help troubleshoot issues"
+-- L["TIP_RememberLastTab"] = "Resume where you left off, even after /reload or logout. When enabled, this overrides the Default Tab setting below."
+-- L["TIP_ViewAddonInfo"] = "View version, author, and attribution information"
+-- L["Total"] = "Total"
+-- L["View Addon Info"] = "View Addon Info"
+--#endregion

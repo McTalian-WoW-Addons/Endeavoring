@@ -4,6 +4,7 @@ local addonName = select(1, ...)
 local ns = select(2, ...)
 
 local constants = ns.Constants
+local L = ns.L
 
 local DebugPrint = ns.DebugPrint
 
@@ -34,9 +35,9 @@ local function InitializeTabSystem(frame)
 	frame:SetTabSystem(tabSystem)
 	
 	-- Register tabs with their content frames
-	frame.tasksTabID = frame:AddNamedTab("Tasks", ns.Tasks.CreateTab(frame))
-	frame.leaderboardTabID = frame:AddNamedTab("Leaderboard", ns.Leaderboard.CreateTab(frame))
-	frame.activityTabID = frame:AddNamedTab("Activity", ns.Activity.CreateTab(frame))
+	frame.tasksTabID = frame:AddNamedTab(L["Tasks"], ns.Tasks.CreateTab(frame))
+	frame.leaderboardTabID = frame:AddNamedTab(L["Leaderboard"], ns.Leaderboard.CreateTab(frame))
+	frame.activityTabID = frame:AddNamedTab(L["Activity"], ns.Activity.CreateTab(frame))
 	
 	-- Hook tab selection to save preference
 	local originalSetTab = frame.SetTab
@@ -99,8 +100,8 @@ local function CreateMainFrame()
 	end)
 	settingsButton:SetScript("OnEnter", function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-		GameTooltip_SetTitle(GameTooltip, "Settings")
-		GameTooltip_AddNormalLine(GameTooltip, "Open Endeavoring settings panel")
+		GameTooltip_SetTitle(GameTooltip, L["Settings"])
+		GameTooltip_AddNormalLine(GameTooltip, L["Open Endeavoring settings panel"])
 		GameTooltip:Show()
 	end)
 	settingsButton:SetScript("OnLeave", GameTooltip_Hide)
