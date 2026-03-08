@@ -6,6 +6,13 @@ local ns = select(2, ...)
 local Tasks = {}
 ns.Tasks = Tasks
 
+-- Quest reward data is loaded lazily. These track in-flight requests so we
+-- only call RequestLoadQuestByID once per quest per session and know when to
+-- re-render after QUEST_DATA_LOAD_RESULT fires.
+local pendingQuestLoads = {}  -- questID → true while load is outstanding
+local loadedQuestIDs = {}     -- questID → true once confirmed loaded/handled
+local rewardRefreshPending = false
+
 local function BuildSortedTasks(initiativeInfo)
 	if not initiativeInfo or not initiativeInfo.tasks then
 		return {}
@@ -414,6 +421,16 @@ function Tasks.Refresh()
 	for index = #tasks + 1, #tasksUI.rows do
 		tasksUI.rows[index]:Hide()
 	end
+
+	-- Request quest reward data loading for any task whose quest isn't cached yet.
+	-- QUEST_DATA_LOAD_RESULT will trigger a re-render once data is available.
+	for _, task in ipairs(tasks) do
+		local qid = task.rewardQuestID
+		if qid and qid > 0 and not loadedQuestIDs[qid] and not pendingQuestLoads[qid] then
+			pendingQuestLoads[qid] = true
+			ns.QuestRewards.RequestLoad(qid)
+		end
+	end
 end
 
 function Tasks.CreateTab(parent)
@@ -511,6 +528,26 @@ function Tasks.CreateTab(parent)
 
 	ns.ui.tasksUI = content
 	UpdateSortHeader()
+
+	-- Re-render when quest reward data finishes loading.
+	-- Only fires for quest IDs we requested; debounced so multiple loads
+	-- arriving near-simultaneously only cause one refresh.
+	local rewardEventFrame = CreateFrame("Frame")
+	rewardEventFrame:RegisterEvent("QUEST_DATA_LOAD_RESULT")
+	rewardEventFrame:SetScript("OnEvent", function(_, _, questID, success)
+		if pendingQuestLoads[questID] then
+			pendingQuestLoads[questID] = nil
+			loadedQuestIDs[questID] = true
+			if success and not rewardRefreshPending then
+				rewardRefreshPending = true
+				C_Timer.After(0, function()
+					rewardRefreshPending = false
+					Tasks.Refresh()
+				end)
+			end
+		end
+	end)
+	content.rewardEventFrame = rewardEventFrame
 
 	content:Hide()
 	return content
