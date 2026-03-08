@@ -37,6 +37,11 @@ local DebugPrint = ns.DebugPrint
 -- INITIATIVE_ACTIVITY_LOG_UPDATED → Get() again, creating an infinite cycle.
 local staleRefreshPending = false
 
+-- Guard for background refreshes triggered when live data has passed its
+-- server-suggested nextUpdateTime. Cleared when fresh data (nextUpdateTime
+-- in the future) is received.
+local backgroundRefreshPending = false
+
 --- Get activity log info with caching support
 --- Returns cached data immediately if available, schedules background update
 --- @return table|nil activityLogInfo The activity log info (cached or live)
@@ -57,6 +62,24 @@ function ActivityLogCache.Get()
 		-- Live data is loaded, update cache and return it
 		ns.DB.SetActivityLogCache(neighborhoodGUID, liveData)
 		staleRefreshPending = false
+
+		-- Check if live data has expired per the server's nextUpdateTime signal.
+		local now = time()
+		local isExpired = liveData.nextUpdateTime
+			and liveData.nextUpdateTime > 0
+			and now >= liveData.nextUpdateTime
+		if not isExpired then
+			-- Data is still fresh; clear any pending background refresh
+			backgroundRefreshPending = false
+		elseif not backgroundRefreshPending then
+			-- Data has expired; request a fresh activity log in the background
+			-- while immediately returning what we have.
+			backgroundRefreshPending = true
+			C_Timer.After(0, function()
+				ns.API.RequestActivityLog()
+			end)
+		end
+
 		return liveData
 	end
 	
