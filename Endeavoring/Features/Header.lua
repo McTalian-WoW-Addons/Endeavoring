@@ -81,7 +81,8 @@ function Header.Create(parent)
 
 	-- Chest ready indicator (experimental feature)
 	-- Shows when endeavor is complete and chest hasn't been looted
-	local chestIndicator = CreateFrame("Frame", nil, header)
+	-- Use Button instead of Frame so we can handle right-click to dismiss
+	local chestIndicator = CreateFrame("Button", nil, header)
 	header.chestIndicator = chestIndicator
 	chestIndicator:SetSize(24, 24)
 	chestIndicator:SetPoint("LEFT", header.infoIcon, "RIGHT", 0, 0)
@@ -104,17 +105,23 @@ function Header.Create(parent)
 	
 	chestIndicator.animGroup = animGroup
 	
-	-- Tooltip
+	-- Tooltip and click-to-dismiss
 	chestIndicator:EnableMouse(true)
+	chestIndicator:RegisterForClicks("RightButtonUp")
 	chestIndicator:SetScript("OnEnter", function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
 		GameTooltip_SetTitle(GameTooltip, "Endeavor Chest Ready!")
 		GameTooltip_AddNormalLine(GameTooltip, "Visit the chest next to the neighborhood bulletin board to claim your reward.")
 		GameTooltip_AddBlankLineToTooltip(GameTooltip)
-		GameTooltip_AddColoredLine(GameTooltip, "This is an experimental feature and may not work as expected.", YELLOW_FONT_COLOR)
+		GameTooltip_AddNormalLine(GameTooltip, "Will dismiss automatically when you open the chest.")
+		GameTooltip_AddColoredLine(GameTooltip, "Right-click to dismiss manually.", GRAY_FONT_COLOR)
 		GameTooltip:Show()
 	end)
 	chestIndicator:SetScript("OnLeave", GameTooltip_Hide)
+	chestIndicator:SetScript("OnClick", function()
+		-- Filtered by RegisterForClicks to only respond to right-clicks
+		Header.MarkChestClaimed(header)
+	end)
 	
 	chestIndicator:Hide() -- Hidden until chest is ready
 	
@@ -145,7 +152,7 @@ function Header.Refresh()
 		for _, milestone in pairs(header.milestones) do
 			milestone:Hide()
 		end
-		Header.UpdateChestIndicator(mainFrame, nil)
+		Header.UpdateChestIndicator(header, nil)
 		return
 	end
 
@@ -184,7 +191,7 @@ function Header.Refresh()
 		end
 		
 		-- Update chest indicator (experimental)
-		Header.UpdateChestIndicator(mainFrame, initiativeInfo)
+		Header.UpdateChestIndicator(header, initiativeInfo)
 	else
 		header.title:SetText(constants.NO_TASK_DATA)
 		header.timeRemaining:SetText(constants.TIME_REMAINING_FALLBACK)
@@ -195,7 +202,7 @@ function Header.Refresh()
 		for _, milestone in pairs(header.milestones) do
 			milestone:Hide()
 		end
-		Header.UpdateChestIndicator(mainFrame, nil)
+		Header.UpdateChestIndicator(header, nil)
 	end
 end
 
@@ -312,14 +319,14 @@ end
 
 --- Update chest ready indicator (experimental feature)
 --- Shows a glowing chest icon when the final milestone is complete but the chest hasn't been looted
---- @param mainFrame table The main Endeavoring frame
+--- @param header table The header frame (as returned by Header.Create)
 --- @param initiativeInfo table|nil Initiative info from API, or nil if no active endeavor
-function Header.UpdateChestIndicator(mainFrame, initiativeInfo)
-	if not mainFrame or not mainFrame.header or not mainFrame.header.chestIndicator then
+function Header.UpdateChestIndicator(header, initiativeInfo)
+	if not header or not header.chestIndicator then
 		return
 	end
 	
-	local chestIndicator = mainFrame.header.chestIndicator
+	local chestIndicator = header.chestIndicator
 	
 	-- Early exit if no active initiative
 	if not initiativeInfo or not initiativeInfo.milestones or #initiativeInfo.milestones == 0 then
@@ -346,26 +353,37 @@ function Header.UpdateChestIndicator(mainFrame, initiativeInfo)
 		return
 	end
 	
-	-- Check if chest has been looted using ReadyForTurnIn
-	local chestQuestID = finalMilestone.rewards[1].rewardQuestID
-	if not chestQuestID or chestQuestID == 0 then
-		chestIndicator:Hide()
-		chestIndicator.animGroup:Stop()
-		return
-	end
-	
-	-- Safe call to ReadyForTurnIn (returns nil if quest doesn't exist or n/a)
-	local isReadyForTurnIn = nil
-	if C_QuestLog and C_QuestLog.ReadyForTurnIn then
-		isReadyForTurnIn = C_QuestLog.ReadyForTurnIn(chestQuestID)
-	end
+	-- WoW provides no reliable client-side API to detect chest loot for this
+	-- reward type. We track claimed state ourselves in SavedVariables, keyed
+	-- by (initiativeID, currentCycleID) so it resets automatically each cycle.
+	local isClaimed = ns.DB.IsChestClaimed(initiativeInfo.initiativeID, initiativeInfo.currentCycleID)
 
-	-- Show indicator if chest is ready to loot
-	if isReadyForTurnIn == true then
+	if not isClaimed then
 		chestIndicator:Show()
 		chestIndicator.animGroup:Play()
 	else
 		chestIndicator:Hide()
 		chestIndicator.animGroup:Stop()
+	end
+end
+
+--- Mark the current initiative cycle's chest as claimed and hide the indicator
+--- @param header table The header frame (as returned by Header.Create)
+function Header.MarkChestClaimed(header)
+	local initiativeInfo = ns.API.GetInitiativeInfo()
+	if not initiativeInfo then return end
+	ns.DB.SetChestClaimed(initiativeInfo.initiativeID, initiativeInfo.currentCycleID)
+	Header.UpdateChestIndicator(header, initiativeInfo)
+end
+
+--- Automatically claim the chest when the Endeavor Coffer spell succeeds.
+--- Called from the UNIT_SPELLCAST_SUCCEEDED event handler; resolves the frame itself.
+function Header.AutoClaimChest()
+	local initiativeInfo = ns.API.GetInitiativeInfo()
+	if not initiativeInfo then return end
+	ns.DB.SetChestClaimed(initiativeInfo.initiativeID, initiativeInfo.currentCycleID)
+	local mainFrame = ns.ui and ns.ui.mainFrame
+	if mainFrame and mainFrame.header then
+		Header.UpdateChestIndicator(mainFrame.header, initiativeInfo)
 	end
 end
