@@ -148,6 +148,7 @@ eventFrame:RegisterEvent("INITIATIVE_COMPLETED")
 eventFrame:RegisterEvent("INITIATIVE_TASK_COMPLETED")
 eventFrame:RegisterEvent("INITIATIVE_ACTIVITY_LOG_UPDATED")
 eventFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
+eventFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 eventFrame:SetScript("OnEvent", function(_, event, ...)
 	if event == "PLAYER_ENTERING_WORLD" then
 		local isLogin, isReload = ...
@@ -211,6 +212,17 @@ eventFrame:SetScript("OnEvent", function(_, event, ...)
 	if event == "GUILD_ROSTER_UPDATE" then
 		-- Debounced broadcast on guild roster changes (with random delay)
 		ns.Coordinator.OnGuildRosterUpdate()
+	end
+
+	if event == "UNIT_SPELLCAST_SUCCEEDED" then
+		local unit, _, spellID = ...
+		if unit == "player" and spellID == ns.Constants.ENDEAVOR_COFFER_SPELL_ID then
+			-- Player just opened the Endeavor Coffer — auto-mark as claimed
+			local ok, err = pcall(ns.Header.AutoClaimChest)
+			if not ok then
+				DebugPrint("AutoClaimChest failed: " .. tostring(err))
+			end
+		end
 	end
 end)
 

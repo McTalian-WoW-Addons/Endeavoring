@@ -61,6 +61,12 @@ ns.Constants = ns.Constants or {
 	PREFIX_INFO = "|cff00ff00" .. addonName .. ":|r",
 	PREFIX_ERROR = "|cffff0000" .. addonName .. ":|r",
 	PREFIX_WARN = "|cffff8800" .. addonName .. ":|r",
+	-- Spell cast by the player when opening the Endeavor Coffer (chest).
+	-- Sourced from Midnight (12.0.1) by inspecting etrace
+	-- UNIT_SPELLCAST_SUCCEEDED for the player when interacting with the Endeavor Coffer.
+	-- To re-verify after patches: enable /etrace, open an Endeavor Coffer,
+	-- and confirm the spellID in the UNIT_SPELLCAST_SUCCEEDED event for your character still matches this value.
+	ENDEAVOR_COFFER_SPELL_ID = 1283568,
 }
 
 --- Message types for sync protocol (CBOR + compression)

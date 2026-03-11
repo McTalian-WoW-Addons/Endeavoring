@@ -36,6 +36,7 @@ local DEFAULT_DB = {
 		profiles = {},
 		activityLogCache = {},  -- Keyed by neighborhoodGUID
 		gossipTracking = {},  -- Content-aware gossip tracking: [targetBTag][profileBTag] = {au, cu, cc}
+		claimedChests = {},  -- Keyed by "initiativeID:cycleID", true when player has claimed that cycle's chest
 		verboseDebug = false,
 		settings = nil,  -- User preferences
 		lastSelectedTab = nil,  -- Remember last tab (1=Tasks, 2=Leaderboard, 3=Activity)
@@ -75,7 +76,36 @@ function DB.Init()
 		EndeavoringDB.global.gossipTracking = {}
 	end
 
+	if not EndeavoringDB.global.claimedChests then
+		EndeavoringDB.global.claimedChests = {}
+	end
+
 	-- myProfile will be initialized on first character login
+end
+
+--- Build the SavedVariables key for a chest claim record
+--- @param initiativeID number
+--- @param cycleID number
+--- @return string
+local function makeChestKey(initiativeID, cycleID)
+	return string.format("%d:%d", initiativeID, cycleID)
+end
+
+--- Mark the chest for the given initiative cycle as claimed by the player
+--- @param initiativeID number The initiative ID
+--- @param cycleID number The current cycle ID
+function DB.SetChestClaimed(initiativeID, cycleID)
+	if not initiativeID or not cycleID then return end
+	EndeavoringDB.global.claimedChests[makeChestKey(initiativeID, cycleID)] = true
+end
+
+--- Check whether the chest for the given initiative cycle has been claimed
+--- @param initiativeID number The initiative ID
+--- @param cycleID number The current cycle ID
+--- @return boolean isClaimed true if the chest has been marked as claimed
+function DB.IsChestClaimed(initiativeID, cycleID)
+	if not initiativeID or not cycleID then return false end
+	return EndeavoringDB.global.claimedChests[makeChestKey(initiativeID, cycleID)] == true
 end
 
 --- Register the current character to the player's BattleTag
