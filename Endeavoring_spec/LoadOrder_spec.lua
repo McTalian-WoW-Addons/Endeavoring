@@ -27,8 +27,37 @@
 require("Endeavoring_spec._mocks.WoWGlobals.APIs")
 require("Endeavoring_spec._mocks.WoWGlobals.FrameAPI")
 
+--- Parse a FrameXML-style .xml file and return an ordered list of .lua file paths.
+--- Extracts <Script file="..."/> entries, recursing into nested .xml imports.
+---@param xmlPath string Path to the XML file
+---@return string[] luaFiles Ordered list of .lua file paths
+local function ParseXML(xmlPath)
+	local xmlDir = xmlPath:match("^(.-/)[^/]+$") or ""
+	local files = {}
+
+	for line in io.lines(xmlPath) do
+		-- Match both <Script file="..."/> and <Include file="..."/>
+		local scriptFile = line:match('[Ss]cript%s+file="([^"]+)"')
+			or line:match('[Ii]nclude%s+file="([^"]+)"')
+		if scriptFile then
+			if scriptFile:match("%.lua$") then
+				table.insert(files, xmlDir .. scriptFile)
+			elseif scriptFile:match("%.xml$") then
+				-- Recurse into nested XML files
+				local nested = ParseXML(xmlDir .. scriptFile)
+				for _, f in ipairs(nested) do
+					table.insert(files, f)
+				end
+			end
+		end
+	end
+
+	return files
+end
+
 --- Parse a .toc file and return an ordered list of .lua file paths.
---- Skips metadata (## lines), comments (#), blank lines, and non-.lua entries.
+--- Skips metadata (## lines), comments (#), and blank lines.
+--- .xml entries are expanded by parsing their <Script> tags.
 --- Paths are prefixed with the TOC's parent directory.
 ---@param tocPath string Absolute or relative path to the .toc file
 ---@return string[] luaFiles Ordered list of .lua file paths
@@ -42,9 +71,14 @@ local function ParseTOC(tocPath)
 
 		-- Skip blank lines, metadata (##), and comments (#)
 		if line ~= "" and not line:match("^#") then
-			-- Only include .lua files (skip .xml, etc.)
 			if line:match("%.lua$") then
 				table.insert(files, dir .. line)
+			elseif line:match("%.xml$") then
+				-- Expand XML includes into their constituent .lua files
+				local xmlFiles = ParseXML(dir .. line)
+				for _, f in ipairs(xmlFiles) do
+					table.insert(files, f)
+				end
 			end
 		end
 	end
