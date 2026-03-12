@@ -221,7 +221,7 @@ eventFrame:SetScript("OnEvent", function(_, event, ...)
 			-- Player just opened the Endeavor Coffer — auto-mark as claimed
 			local ok, err = pcall(ns.Header.AutoClaimChest)
 			if not ok then
-				DebugPrint("AutoClaimChest failed: " .. tostring(err))
+				DebugPrint(string.format(L["FMT_DBG_AutoClaimChestFailed"], tostring(err)))
 			end
 		end
 	end

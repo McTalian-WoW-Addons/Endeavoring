@@ -3,9 +3,10 @@ local addonName = select(1, ...)
 ---@class Ndvrng_NS
 local ns = select(2, ...)
 
+local L = ns.L
+
 local Activity = {}
 ns.Activity = Activity
-local L = ns.L
 
 local DebugPrint = ns.DebugPrint
 
@@ -92,7 +93,7 @@ local function GetTimeRangeName(range)
 	elseif range == TIME_RANGE.ONE_HOUR then
 		return L["1 Hour"]
 	end
-	return "Unknown"
+	return L["Current Endeavor"]
 end
 
 --- Build filtered activity log based on time range and "my chars only"
@@ -643,7 +644,7 @@ function Activity.CreateTab(parent)
 	charHeader.text = charHeader:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	charHeader.text:SetAllPoints()
 	charHeader.text:SetJustifyH("LEFT")
-	charHeader.text:SetText(L["Character (Account)"])
+	charHeader.text:SetText(L["Player"])
 
 	local contribHeader = CreateFrame("Button", nil, header)
 	contribHeader:SetPoint("LEFT", charHeader, "RIGHT", 4, 0)

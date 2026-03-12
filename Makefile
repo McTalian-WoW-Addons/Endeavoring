@@ -1,4 +1,4 @@
-.PHONY: toc_check toc_update watch dev build test test-only test-cov test-file test-pattern test-ci lua_deps wbt_setup i18n_check i18n_fmt
+.PHONY: toc_check toc_update watch dev build test test-only test-cov test-file test-pattern test-ci lua_deps wbt_setup i18n_check i18n_fmt hardcode_string_check
 
 ROCKSBIN := $(HOME)/.luarocks/bin
 WBT_REF ?= v1-beta
@@ -75,6 +75,11 @@ i18n_check: wbt_setup
 		$(WBT_DIR)/scripts/i18n/check_for_missing_locale_keys.py \
 		--addon-dir Endeavoring \
 		--locale-dir Endeavoring/locale
+
+hardcode_string_check: wbt_setup
+	@uv run --project $(WBT_DIR)/scripts/i18n \
+		$(WBT_DIR)/scripts/i18n/hardcode_string_check.py \
+		--addon-dir Endeavoring
 
 i18n_fmt: wbt_setup
 	@uv run --project $(WBT_DIR)/scripts/i18n \

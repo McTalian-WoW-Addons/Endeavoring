@@ -99,7 +99,7 @@ ns.SK = {
 	characters = "c",
 	charsCount = "cc",
 	-- Character object fields
-	name = "n",
+	name = "n", -- nocheck: wire key, not a user-facing string
 	realm = "r",
 	addedAt = "d",
 	-- Gossip digest

@@ -6,6 +6,7 @@ local ns = select(2, ...)
 local API = {}
 ns.API = API
 
+local L = ns.L
 local DebugPrint = ns.DebugPrint
 
 function API.GetInitiativeInfo()
@@ -108,7 +109,7 @@ function API.ViewActiveNeighborhood()
 			return true
 		end
 
-		DebugPrint("Setting viewing neighborhood to active neighborhood")
+		DebugPrint(L["DBG_SettingViewingNeighborhood"])
 
 		if C_NeighborhoodInitiative.GetActiveNeighborhood then
 			local activeNeighborhood = C_NeighborhoodInitiative.GetActiveNeighborhood()
@@ -117,7 +118,7 @@ function API.ViewActiveNeighborhood()
 				return true
 			end
 
-			DebugPrint("No active neighborhood found, trying fallback method")
+			DebugPrint(L["DBG_NoActiveNeighborhood"])
 
 			if C_Housing and C_Housing.GetCurrentNeighborhoodGUID then
 				-- Fallback: try to find a neighborhood matching the player's current location
@@ -128,7 +129,7 @@ function API.ViewActiveNeighborhood()
 					return true
 				end
 
-				DebugPrint("No current neighborhood found from housing API")
+				DebugPrint(L["DBG_NoCurrentNeighborhood"])
 			end
 		end
 	end
