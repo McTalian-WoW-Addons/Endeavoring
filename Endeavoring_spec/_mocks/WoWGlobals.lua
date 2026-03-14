@@ -59,6 +59,12 @@ _G.tContains = _G.tContains or function(tbl, item)
 	return false
 end
 
+-- GetLocale: returns the client locale string (e.g. "enUS", "deDE")
+-- In tests, default to US English so non-English locale files skip their translations.
+_G.GetLocale = _G.GetLocale or function()
+	return "enUS"
+end
+
 -- C_Timer stub
 _G.C_Timer = _G.C_Timer or {}
 _G.C_Timer.NewTimer = _G.C_Timer.NewTimer or function(_, callback)

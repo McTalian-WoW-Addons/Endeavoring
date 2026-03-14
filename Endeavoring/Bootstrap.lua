@@ -52,11 +52,11 @@ ns.Constants = ns.Constants or {
 	ACTIVITY_CHAR_WIDTH = 120,
 	ACTIVITY_CONTRIB_WIDTH = 80,
 
-	NO_ACTIVE_ENDEAVOR = "No active endeavor",
-	NO_TASK_DATA = "No task data, try opening the housing dashboard",
-	TIME_REMAINING_FALLBACK = "Time Remaining: --",
-	NO_TASKS_AVAILABLE = "No tasks available",
-	NO_LEADERBOARD_DATA = "No activity recorded",
+	NO_ACTIVE_ENDEAVOR = ns.L["No active endeavor"],
+	NO_TASK_DATA = ns.L["No task data, try opening the housing dashboard"],
+	TIME_REMAINING_FALLBACK = ns.L["Time Remaining: --"],
+	NO_TASKS_AVAILABLE = ns.L["No tasks available"],
+	NO_LEADERBOARD_DATA = ns.L["No activity recorded"],
 	-- Message prefixes
 	PREFIX_INFO = "|cff00ff00" .. addonName .. ":|r",
 	PREFIX_ERROR = "|cffff0000" .. addonName .. ":|r",
@@ -99,7 +99,7 @@ ns.SK = {
 	characters = "c",
 	charsCount = "cc",
 	-- Character object fields
-	name = "n",
+	name = "n", -- nocheck: wire key, not a user-facing string
 	realm = "r",
 	addedAt = "d",
 	-- Gossip digest

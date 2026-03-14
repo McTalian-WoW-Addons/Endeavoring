@@ -3,6 +3,8 @@ local addonName = select(1, ...)
 ---@class Ndvrng_NS
 local ns = select(2, ...)
 
+local L = ns.L
+
 local Activity = {}
 ns.Activity = Activity
 
@@ -45,28 +47,28 @@ local function FormatRelativeTime(timestamp)
 	
 	-- Less than 1 minute: "Just now"
 	if diff < 60 then
-		return "Just now"
+		return L["Just now"]
 	end
 	
 	-- Less than 1 hour: "Xm ago"
 	if diff < 3600 then
 		local minutes = math.floor(diff / 60)
-		return string.format("%dm ago", minutes)
+		return string.format(L["FMT_MinutesAgo"], minutes)
 	end
 	
 	-- Less than 24 hours: "Xh ago"
 	if diff < 86400 then
 		local hours = math.floor(diff / 3600)
-		return string.format("%dh ago", hours)
+		return string.format(L["FMT_HoursAgo"], hours)
 	end
 	
 	-- Less than 7 days: "X days ago"
 	if diff < 604800 then
 		local days = math.floor(diff / 86400)
 		if days == 1 then
-			return "1 day ago"
+			return L["1 day ago"]
 		else
-			return string.format("%d days ago", days)
+			return string.format(L["FMT_DaysAgo"], days)
 		end
 	end
 	
@@ -79,19 +81,19 @@ end
 --- @return string name Display name for the filter
 local function GetTimeRangeName(range)
 	if range == TIME_RANGE.CURRENT_ENDEAVOR then
-		return "Current Endeavor"
+		return L["Current Endeavor"]
 	elseif range == TIME_RANGE.SEVEN_DAYS then
-		return "7 Days"
+		return L["7 Days"]
 	elseif range == TIME_RANGE.ONE_DAY then
-		return "24 Hours"
+		return L["24 Hours"]
 	elseif range == TIME_RANGE.TWELVE_HOURS then
-		return "12 Hours"
+		return L["12 Hours"]
 	elseif range == TIME_RANGE.SIX_HOURS then
-		return "6 Hours"
+		return L["6 Hours"]
 	elseif range == TIME_RANGE.ONE_HOUR then
-		return "1 Hour"
+		return L["1 Hour"]
 	end
-	return "Unknown"
+	return L["Current Endeavor"]
 end
 
 --- Build filtered activity log based on time range and "my chars only"
@@ -224,27 +226,27 @@ local function UpdateSortHeader(content)
 
 	-- Update all headers
 	if sortKey == constants.ACTIVITY_SORT_TIME then
-		content.timeHeader.text:SetText("Time " .. arrow)
+		content.timeHeader.text:SetText(L["Time"] .. " " .. arrow)
 	else
-		content.timeHeader.text:SetText("Time")
+		content.timeHeader.text:SetText(L["Time"])
 	end
 
 	if sortKey == constants.ACTIVITY_SORT_TASK then
-		content.taskHeader.text:SetText("Task " .. arrow)
+		content.taskHeader.text:SetText(L["Task"] .. " " .. arrow)
 	else
-		content.taskHeader.text:SetText("Task")
+		content.taskHeader.text:SetText(L["Task"])
 	end
 
 	if sortKey == constants.ACTIVITY_SORT_CHAR then
-		content.charHeader.text:SetText("Character (Account) " .. arrow)
+		content.charHeader.text:SetText(L["Character (Account)"] .. " " .. arrow)
 	else
-		content.charHeader.text:SetText("Character (Account)")
+		content.charHeader.text:SetText(L["Character (Account)"])
 	end
 
 	if sortKey == constants.ACTIVITY_SORT_CONTRIB then
-		content.contribHeader.text:SetText("Contribution " .. arrow)
+		content.contribHeader.text:SetText(L["Contribution"] .. " " .. arrow)
 	else
-		content.contribHeader.text:SetText("Contribution")
+		content.contribHeader.text:SetText(L["Contribution"])
 	end
 end
 
@@ -376,8 +378,8 @@ local function CreateActivityRow(parent, index)
 	contribContainer:SetScript("OnEnter", function(self)
 		if self.amount == 0 and ns.API.IsInitiativeCompleted() then
 			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-			GameTooltip:SetText("Endeavor Complete", 1, 1, 1, 1, true)
-			GameTooltip_AddNormalLine(GameTooltip, "Contributions show as 0 after an Endeavor is completed.")
+			GameTooltip:SetText(L["Endeavor Complete"], 1, 1, 1, 1, true)
+			GameTooltip_AddNormalLine(GameTooltip, L["Contributions show as 0 after an Endeavor is completed."])
 			GameTooltip:Show()
 		end
 	end)
@@ -491,7 +493,7 @@ local function UpdateActivityDisplay()
 	if not activityLogInfo or not activityLogInfo.isLoaded then
 		-- Show empty state
 		if content.emptyText then
-			content.emptyText:SetText("Loading activity log...")
+			content.emptyText:SetText(L["Loading activity log..."])
 			content.emptyText:Show()
 		end
 		if content.scrollChild then
@@ -508,7 +510,7 @@ local function UpdateActivityDisplay()
 		-- Show empty state
 		if content.emptyText then
 			if state.showMyCharsOnly then
-				content.emptyText:SetText("No activity found for your characters")
+				content.emptyText:SetText(L["No activity found for your characters"])
 			else
 				content.emptyText:SetText(ns.Constants.NO_LEADERBOARD_DATA)
 			end
@@ -602,7 +604,7 @@ function Activity.CreateTab(parent)
 	
 	local myCharsLabel = myCharsCheck:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	myCharsLabel:SetPoint("LEFT", myCharsCheck, "RIGHT", 2, 0)
-	myCharsLabel:SetText("My Characters Only")
+	myCharsLabel:SetText(L["My Characters Only"])
 	content.myCharsCheck = myCharsCheck
 
 	-- Header row with column labels (clickable for sorting)
@@ -620,7 +622,7 @@ function Activity.CreateTab(parent)
 	timeHeader.text = timeHeader:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	timeHeader.text:SetAllPoints()
 	timeHeader.text:SetJustifyH("LEFT")
-	timeHeader.text:SetText("Time")
+	timeHeader.text:SetText(L["Time"])
 
 	local taskHeader = CreateFrame("Button", nil, header)
 	taskHeader:SetPoint("LEFT", timeHeader, "RIGHT", 4, 0)
@@ -631,7 +633,7 @@ function Activity.CreateTab(parent)
 	taskHeader.text = taskHeader:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	taskHeader.text:SetAllPoints()
 	taskHeader.text:SetJustifyH("LEFT")
-	taskHeader.text:SetText("Task")
+	taskHeader.text:SetText(L["Task"])
 
 	local charHeader = CreateFrame("Button", nil, header)
 	charHeader:SetPoint("LEFT", taskHeader, "RIGHT", 4, 0)
@@ -642,7 +644,7 @@ function Activity.CreateTab(parent)
 	charHeader.text = charHeader:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	charHeader.text:SetAllPoints()
 	charHeader.text:SetJustifyH("LEFT")
-	charHeader.text:SetText("Player")
+	charHeader.text:SetText(L["Player"])
 
 	local contribHeader = CreateFrame("Button", nil, header)
 	contribHeader:SetPoint("LEFT", charHeader, "RIGHT", 4, 0)
@@ -653,7 +655,7 @@ function Activity.CreateTab(parent)
 	contribHeader.text = contribHeader:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	contribHeader.text:SetAllPoints()
 	contribHeader.text:SetJustifyH("RIGHT")
-	contribHeader.text:SetText("Contribution")
+	contribHeader.text:SetText(L["Contribution"])
 
 	-- Store header references for sort indicator updates
 	content.timeHeader = timeHeader

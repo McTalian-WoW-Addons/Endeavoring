@@ -5,6 +5,7 @@ local ns = select(2, ...)
 
 local Tasks = {}
 ns.Tasks = Tasks
+local L = ns.L
 
 -- Quest reward data is loaded lazily. These track in-flight requests so we
 -- only call RequestLoadQuestByID once per quest per session and know when to
@@ -103,10 +104,10 @@ local function UpdateSortHeader()
 		couponsSuffix = state.tasksSortAsc and asc or desc
 	end
 
-	ns.ui.tasksUI.nameHeader:SetText("Task" .. nameSuffix)
-	ns.ui.tasksUI.contributionHeader:SetText("Contribution" .. pointsSuffix)
-	ns.ui.tasksUI.xpHeader:SetText("House XP" .. xpSuffix)
-	ns.ui.tasksUI.couponsHeader:SetText("Coupons" .. couponsSuffix)
+	ns.ui.tasksUI.nameHeader:SetText(L["Task"] .. nameSuffix)
+	ns.ui.tasksUI.contributionHeader:SetText(L["Contribution"] .. pointsSuffix)
+	ns.ui.tasksUI.xpHeader:SetText(L["House XP"] .. xpSuffix)
+	ns.ui.tasksUI.couponsHeader:SetText(L["Coupons"] .. couponsSuffix)
 end
 
 local function SetSort(sortKey)
@@ -273,7 +274,7 @@ local function CreateTaskRow(parent, index)
 		end
 		
 		GameTooltip_AddBlankLineToTooltip(GameTooltip)
-		GameTooltip_AddInstructionLine(GameTooltip, "Shift-click to track task")
+		GameTooltip_AddInstructionLine(GameTooltip, L["Shift-click to track task"])
 		
 		GameTooltip:Show()
 	end)
@@ -456,7 +457,7 @@ function Tasks.CreateTab(parent)
 	nameHeader.text = nameHeader:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	nameHeader.text:SetPoint("LEFT")
 	nameHeader.text:SetJustifyH("LEFT")
-	nameHeader.text:SetText("Task")
+	nameHeader.text:SetText(L["Task"])
 
 	local contributionHeader = CreateFrame("Button", nil, header)
 	contributionHeader:SetPoint("LEFT", nameHeader, "RIGHT", 0, 0)
@@ -467,7 +468,7 @@ function Tasks.CreateTab(parent)
 	contributionHeader.text = contributionHeader:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	contributionHeader.text:SetPoint("CENTER")
 	contributionHeader.text:SetJustifyH("CENTER")
-	contributionHeader.text:SetText("Contribution")
+	contributionHeader.text:SetText(L["Contribution"])
 
 	local xpHeader = CreateFrame("Button", nil, header)
 	xpHeader:SetPoint("LEFT", contributionHeader, "RIGHT", 0, 0)
@@ -478,7 +479,7 @@ function Tasks.CreateTab(parent)
 	xpHeader.text = xpHeader:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	xpHeader.text:SetPoint("CENTER")
 	xpHeader.text:SetJustifyH("CENTER")
-	xpHeader.text:SetText("House XP")
+	xpHeader.text:SetText(L["House XP"])
 	
 	local couponsHeader = CreateFrame("Button", nil, header)
 	couponsHeader:SetPoint("LEFT", xpHeader, "RIGHT", 0, 0)
@@ -489,7 +490,7 @@ function Tasks.CreateTab(parent)
 	couponsHeader.text = couponsHeader:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	couponsHeader.text:SetPoint("CENTER")
 	couponsHeader.text:SetJustifyH("CENTER")
-	couponsHeader.text:SetText("Coupons")
+	couponsHeader.text:SetText(L["Coupons"])
 
 	local scrollFrame = CreateFrame("ScrollFrame", nil, content, "UIPanelScrollFrameTemplate")
 	scrollFrame:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -6)

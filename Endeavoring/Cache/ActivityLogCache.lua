@@ -29,6 +29,7 @@ INVALIDATION:
 - Clears on INITIATIVE_COMPLETED
 --]]
 
+local L = ns.L
 local DebugPrint = ns.DebugPrint
 
 -- Guard to prevent re-entrant stale cache refresh requests.
@@ -120,7 +121,7 @@ end
 function ActivityLogCache.OnActivityLogUpdated()
 	local activityLogInfo = ns.API.GetActivityLogInfo()
 	if not activityLogInfo or not activityLogInfo.isLoaded or #activityLogInfo.taskActivity == 0 then
-		DebugPrint("Activity log updated event received, but data is not loaded or empty. Ignoring.")
+		DebugPrint(L["DBG_ActivityLogNotReady"])
 		return
 	end
 	

@@ -100,6 +100,11 @@ function nsMocks.CreateNS()
 		entries = "e",
 	}
 
+	-- Locale table (mirrors locale/init.lua — key falls back to key itself)
+	ns.L = setmetatable({}, {
+		__index = function(_, k) return k end,
+	})
+
 	-- State
 	ns.state = {
 		tasksSortKey = ns.Constants.TASKS_SORT_POINTS,

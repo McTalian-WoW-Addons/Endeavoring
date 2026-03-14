@@ -13,15 +13,16 @@ ns.Settings = Settings
 local INFO = ns.Constants.PREFIX_INFO
 local ERROR = ns.Constants.PREFIX_ERROR
 local DB = ns.DB
+local L = ns.L
 
 --- Settings variable name for WoW Settings system
 local SETTINGS_VARIABLE_PREFIX = "ENDEAVORING_"
 
 --- Tab options for dropdown
 local TAB_OPTIONS = {
-	{ value = 1, label = "Tasks" },
-	{ value = 2, label = "Leaderboard" }, 
-	{ value = 3, label = "Activity" }
+	{ value = 1, label = L["Tasks"] },
+	{ value = 2, label = L["Leaderboard"] },
+	{ value = 3, label = L["Activity"] }
 }
 
 --- Initialize settings with defaults if needed
@@ -78,13 +79,13 @@ function Settings.Register()
 		local category, layout = WoWSettings.RegisterVerticalLayoutCategory("Endeavoring")
 		
 		-- Add section header
-		layout:AddInitializer(CreateSettingsListSectionHeaderInitializer("General"))
+		layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(L["General"]))
 		
 		-- Remember Last Tab checkbox (first, as it affects the Default Tab behavior)
 		do
 			local variable = SETTINGS_VARIABLE_PREFIX .. "REMEMBER_LAST_TAB"
-			local name = "Remember Last Tab"
-			local tooltip = "Resume where you left off, even after /reload or logout. When enabled, this overrides the Default Tab setting below."
+			local name = L["Remember Last Tab"]
+			local tooltip = L["TIP_RememberLastTab"]
 			
 			local function GetValue()
 				return Settings.Get().rememberLastTab
@@ -110,8 +111,8 @@ function Settings.Register()
 		-- Default Tab dropdown (only used when Remember Last Tab is disabled)
 		do
 			local variable = SETTINGS_VARIABLE_PREFIX .. "DEFAULT_TAB"
-			local name = "Default Tab"
-			local tooltip = "Which tab to open when 'Remember Last Tab' is disabled. This setting is ignored when remembering your last tab."
+			local name = L["Default Tab"]
+			local tooltip = L["TIP_DefaultTab"]
 			
 			local function GetValue()
 				return Settings.Get().defaultTab or 1
@@ -138,12 +139,12 @@ function Settings.Register()
 		end
 		
 		-- Player Alias section
-		layout:AddInitializer(CreateSettingsListSectionHeaderInitializer("Player Alias"))
+		layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(L["Player Alias"]))
 		
 		-- Show Current Alias button
 		do
-			local name = "Change Player Alias"
-			local tooltip = "Set a custom display name for leaderboards and activity logs"
+			local name = L["Change Player Alias"]
+			local tooltip = L["TIP_ChangeAlias"]
 			
 			local function OnButtonClick()
 				local currentAlias = DB.GetPlayerAlias() or ""
@@ -158,13 +159,13 @@ function Settings.Register()
 		end
 		
 		-- Debug section
-		layout:AddInitializer(CreateSettingsListSectionHeaderInitializer("Debug"))
+		layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(L["Debug"]))
 		
 -- Enable Debug Logs checkbox
 	do
 		local variable = SETTINGS_VARIABLE_PREFIX .. "DEBUG_MODE"
-		local name = "Enable Debug Logs"
-		local tooltip = "Show detailed debug information in chat to help troubleshoot issues"
+		local name = L["Enable Debug Logs"]
+		local tooltip = L["TIP_EnableDebugLogs"]
 			
 			local function GetValue()
 				return DB.IsVerboseDebug()
@@ -177,9 +178,9 @@ function Settings.Register()
 				DB.SetSettings(settings)
 				
 				if value then
-					print(INFO .. " Debug mode enabled. Use /chatlog to stream logs to a file.")
+					print(INFO .. " " .. L["MSG_DebugEnabled"])
 				else
-					print(INFO .. " Debug mode disabled.")
+					print(INFO .. " " .. L["MSG_DebugDisabled"])
 				end
 			end
 			
@@ -190,12 +191,12 @@ function Settings.Register()
 		end
 		
 		-- About section
-		layout:AddInitializer(CreateSettingsListSectionHeaderInitializer("About"))
+		layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(L["About"]))
 		
 		-- Version and Author info
 		do
-			local name = "View Addon Info"
-			local tooltip = "View version, author, and attribution information"
+			local name = L["View Addon Info"]
+			local tooltip = L["TIP_ViewAddonInfo"]
 			
 			local function OnButtonClick()
 				StaticPopup_Show("ENDEAVORING_ABOUT")
@@ -219,14 +220,14 @@ function Settings.Open()
 	if ns.settingsCategoryID then
 		WoWSettings.OpenToCategory(ns.settingsCategoryID)
 	else
-		print(INFO .. " Settings not yet initialized. Please try again in a moment.")
+		print(INFO .. " " .. L["MSG_SettingsNotReady"])
 	end
 end
 
 -- Register dialog for setting player alias
 StaticPopupDialogs["ENDEAVORING_SET_ALIAS"] = {
-	text = "Set your player alias for Endeavoring.\n\nThis name will appear in leaderboards and activity logs instead of your BattleTag.\n\nCurrent alias: %s",
-	button1 = "Set Alias",
+	text = L["DLG_AliasPromptText"],
+	button1 = L["Set Alias"],
 	button2 = "Cancel",
 	hasEditBox = 1,
 	maxLetters = 20,

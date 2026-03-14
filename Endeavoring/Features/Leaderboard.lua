@@ -5,6 +5,7 @@ local ns = select(2, ...)
 
 local Leaderboard = {}
 ns.Leaderboard = Leaderboard
+local L = ns.L
 
 local DebugPrint = ns.DebugPrint
 
@@ -232,10 +233,10 @@ local function UpdateSortHeader()
 		entriesSuffix = state.sortAsc and asc or desc
 	end
 
-	ns.ui.leaderboardUI.rankHeader:SetText("Rank" .. rankSuffix)
-	ns.ui.leaderboardUI.nameHeader:SetText("Player" .. nameSuffix)
-	ns.ui.leaderboardUI.totalHeader:SetText("Total" .. totalSuffix)
-	ns.ui.leaderboardUI.entriesHeader:SetText("Tasks Completed" .. entriesSuffix)
+	ns.ui.leaderboardUI.rankHeader:SetText(L["Rank"] .. rankSuffix)
+	ns.ui.leaderboardUI.nameHeader:SetText(L["Player"] .. nameSuffix)
+	ns.ui.leaderboardUI.totalHeader:SetText(L["Total"] .. totalSuffix)
+	ns.ui.leaderboardUI.entriesHeader:SetText(L["Tasks Completed"] .. entriesSuffix)
 end
 
 --- Set the sort key and direction
@@ -279,11 +280,11 @@ end
 --- @return string name Display name for the time range
 function Leaderboard.GetTimeRangeName(range)
 	if range == TIME_RANGE.TODAY then
-		return "24 Hours"
+		return L["24 Hours"]
 	elseif range == TIME_RANGE.THIS_WEEK then
-		return "7 Days"
+		return L["7 Days"]
 	else
-		return "Current Endeavor"
+		return L["Current Endeavor"]
 	end
 end
 
@@ -341,9 +342,9 @@ local function CreateLeaderboardRow(parent, index)
 		
 		GameTooltip:SetOwner(self, "ANCHOR_CURSOR_RIGHT", 4, 0)
 		GameTooltip:SetText(self.data.displayName, 1, 1, 1, 1, true)
-		GameTooltip:AddLine("<Endeavoring User>", 86/255, 130/255, 3/255)
+		GameTooltip:AddLine(L["<Endeavoring User>"], 86/255, 130/255, 3/255)
 		GameTooltip:AddLine(" ")
-		GameTooltip:AddLine("Contributing Characters:", 0.5, 0.5, 0.5)
+		GameTooltip:AddLine(L["Contributing Characters:"], 0.5, 0.5, 0.5)
 		
 		for _, charName in ipairs(self.data.charNames) do
 			GameTooltip:AddLine(charName, 1, 0.82, 0)
@@ -399,7 +400,7 @@ local function UpdateLeaderboardDisplay()
 
 	-- Check if activity log is loaded (follows Blizzard's pattern)
 	if not activityLog or not activityLog.isLoaded then
-		leaderboardUI.emptyText:SetText("Loading activity data...")
+		leaderboardUI.emptyText:SetText(L["Loading activity data..."])
 		leaderboardUI.emptyText:Show()
 		for _, row in ipairs(leaderboardUI.rows) do
 			row:Hide()
@@ -535,7 +536,7 @@ function Leaderboard.CreateTab(parent)
 	rankHeader.text = rankHeader:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	rankHeader.text:SetAllPoints()
 	rankHeader.text:SetJustifyH("LEFT")
-	rankHeader.text:SetText("Rank")
+	rankHeader.text:SetText(L["Rank"])
 
 	local nameHeader = CreateFrame("Button", nil, header)
 	nameHeader:SetPoint("LEFT", rankHeader, "RIGHT", 0, 0)
@@ -546,7 +547,7 @@ function Leaderboard.CreateTab(parent)
 	nameHeader.text = nameHeader:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	nameHeader.text:SetAllPoints()
 	nameHeader.text:SetJustifyH("LEFT")
-	nameHeader.text:SetText("Player")
+	nameHeader.text:SetText(L["Player"])
 
 	-- Account for scrollbar width from UIPanelScrollFrameTemplate
 	local scrollbarOffset = constants.SCROLLBAR_WIDTH
@@ -560,7 +561,7 @@ function Leaderboard.CreateTab(parent)
 	totalHeader.text = totalHeader:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	totalHeader.text:SetAllPoints()
 	totalHeader.text:SetJustifyH("RIGHT")
-	totalHeader.text:SetText("Total")
+	totalHeader.text:SetText(L["Total"])
 
 	local entriesHeader = CreateFrame("Button", nil, header)
 	entriesHeader:SetPoint("LEFT", totalHeader, "RIGHT", 0, 0)
@@ -571,7 +572,7 @@ function Leaderboard.CreateTab(parent)
 	entriesHeader.text = entriesHeader:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 	entriesHeader.text:SetAllPoints()
 	entriesHeader.text:SetJustifyH("RIGHT")
-	entriesHeader.text:SetText("Tasks Completed")
+	entriesHeader.text:SetText(L["Tasks Completed"])
 
 	-- Scroll frame
 	local scrollFrame = CreateFrame("ScrollFrame", nil, content, "UIPanelScrollFrameTemplate")

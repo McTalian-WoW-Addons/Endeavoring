@@ -15,6 +15,7 @@
 #embeds.xml
 #@end-no-lib-strip@
 
+locale/index.xml
 Bootstrap.lua
 Services/PlayerInfo.lua
 Services/MessageCodec.lua
@@ -35,4 +36,3 @@ Features/Settings.lua
 Integrations/HousingDashboard.lua
 Commands.lua
 Core.lua
-#locale/locales.xml

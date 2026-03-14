@@ -5,6 +5,7 @@ local ns = select(2, ...)
 
 local Header = {}
 ns.Header = Header
+local L = ns.L
 
 function Header.Create(parent)
 	local constants = ns.Constants
@@ -110,11 +111,11 @@ function Header.Create(parent)
 	chestIndicator:RegisterForClicks("RightButtonUp")
 	chestIndicator:SetScript("OnEnter", function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
-		GameTooltip_SetTitle(GameTooltip, "Endeavor Chest Ready!")
-		GameTooltip_AddNormalLine(GameTooltip, "Visit the chest next to the neighborhood bulletin board to claim your reward.")
+		GameTooltip_SetTitle(GameTooltip, L["Endeavor Chest Ready!"])
+		GameTooltip_AddNormalLine(GameTooltip, L["TIP_ChestIndicator"])
 		GameTooltip_AddBlankLineToTooltip(GameTooltip)
-		GameTooltip_AddNormalLine(GameTooltip, "Will dismiss automatically when you open the chest.")
-		GameTooltip_AddColoredLine(GameTooltip, "Right-click to dismiss manually.", GRAY_FONT_COLOR)
+		GameTooltip_AddNormalLine(GameTooltip, L["TIP_ChestAutoDismiss"])
+		GameTooltip_AddColoredLine(GameTooltip, L["TIP_ChestRightClick"], GREEN_FONT_COLOR)
 		GameTooltip:Show()
 	end)
 	chestIndicator:SetScript("OnLeave", GameTooltip_Hide)
@@ -241,12 +242,12 @@ function Header.UpdateMilestones(header, milestones, currentProgress, maxProgres
 				end
 				
 				GameTooltip:SetOwner(self, "ANCHOR_LEFT", -10, 0)
-				GameTooltip_SetTitle(GameTooltip, "Milestone " .. self.index)
-				GameTooltip_AddNormalLine(GameTooltip, "Progress Required: " .. self.milestoneData.requiredContributionAmount)
+				GameTooltip_SetTitle(GameTooltip, string.format(L["FMT_MilestoneTooltipTitle"], self.index))
+				GameTooltip_AddNormalLine(GameTooltip, string.format(L["FMT_MilestoneProgressRequired"], self.milestoneData.requiredContributionAmount))
 				
 				if self.milestoneData.rewards and #self.milestoneData.rewards > 0 then
 					GameTooltip_AddBlankLineToTooltip(GameTooltip)
-					GameTooltip_AddHighlightLine(GameTooltip, "Rewards:")
+					GameTooltip_AddHighlightLine(GameTooltip, L["Rewards:"])
 					for _, reward in ipairs(self.milestoneData.rewards) do
 						if reward.title and reward.title ~= "" then
 							local rewardText = reward.title
@@ -291,7 +292,7 @@ function Header.UpdateMilestones(header, milestones, currentProgress, maxProgres
 		local isCompleted = currentProgress >= milestoneInfo.requiredContributionAmount
 		
 		-- Update text and appearance
-		entry.text:SetText(string.format("Milestone %d  %d%%", i, percentThreshold))
+		entry.text:SetText(string.format(L["FMT_MilestoneLabel"], i, percentThreshold))
 		
 		if isCompleted then
 			entry.checkmark:Show()
