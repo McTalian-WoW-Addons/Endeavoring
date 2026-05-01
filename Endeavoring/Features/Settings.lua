@@ -69,6 +69,18 @@ function Settings.SaveLastTab(tabID)
 	end
 end
 
+--- Get whether position opt-out is enabled
+--- @return boolean enabled Whether position opt-out is enabled
+function Settings.GetPositionOptOut()
+	return DB.IsPositionOptOut()
+end
+
+--- Set position opt-out
+--- @param enabled boolean Whether to enable position opt-out
+function Settings.SetPositionOptOut(enabled)
+	DB.SetPositionOptOut(enabled)
+end
+
 --- Register the settings panel with WoW's Settings system
 function Settings.Register()
 	-- Wait for addon to fully load
@@ -137,7 +149,32 @@ function Settings.Register()
 				WoWSettings.VarType.Number, name, defaultValue, GetValue, SetValue)
 			WoWSettings.CreateDropdown(category, setting, GetOptions, tooltip)
 		end
-		
+
+		-- Position Opt-Out checkbox
+		do
+			local variable = SETTINGS_VARIABLE_PREFIX .. "POSITION_OPT_OUT"
+			local name = L["Position Opt-Out"]
+			local tooltip = L["TIP_PositionOptOut"]
+
+			local function GetValue()
+				return Settings.GetPositionOptOut()
+			end
+
+			local function SetValue(value)
+				Settings.SetPositionOptOut(value)
+				if value then
+					ns.DebugPrint("Position opt-out enabled: position will not be broadcast and incoming positions will not be rendered.")
+				else
+					ns.DebugPrint("Position opt-out disabled: position sharing is active.")
+				end
+			end
+
+			local defaultValue = false
+			local setting = WoWSettings.RegisterProxySetting(category, variable,
+				WoWSettings.VarType.Boolean, name, defaultValue, GetValue, SetValue)
+			WoWSettings.CreateCheckbox(category, setting, tooltip)
+		end
+
 		-- Player Alias section
 		layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(L["Player Alias"]))
 		
