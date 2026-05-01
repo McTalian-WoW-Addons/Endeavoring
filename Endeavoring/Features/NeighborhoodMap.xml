@@ -1,0 +1,24 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+
+    <!--
+        EndeavoringNeighborPinTemplate
+        A simple colored dot pin for the World Map, using the MapCanvas pin system.
+        SetScalingLimits(1, 1, 1) keeps the dot a consistent screen size regardless
+        of zoom level — Blizzard's pin system handles scale automatically via
+        ApplyCurrentScale() / OnCanvasScaleChanged().
+    -->
+    <Frame name="EndeavoringNeighborPinTemplate" mixin="EndeavoringNeighborPinMixin"
+           virtual="true" enableMouse="true">
+        <Size x="12" y="12"/>
+        <Layers>
+            <Layer level="ARTWORK">
+                <Texture parentKey="Dot" setAllPoints="true">
+                    <Color r="1" g="1" b="1" a="1"/>
+                </Texture>
+            </Layer>
+        </Layers>
+    </Frame>
+
+</Ui>
