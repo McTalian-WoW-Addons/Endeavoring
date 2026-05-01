@@ -35,10 +35,10 @@ layering: Coordinator orchestrates, AddonMessages handles low-level WoW API.
 
 -- Configuration
 local GUILD_ROSTER_DEBOUNCE_SECONDS = 20  -- Debounce time for roster updates
-local GUILD_ROSTER_STORM_RANDOM_DELAY_RANGE = {15, 60}  -- Random delay range (seconds) for roster-triggered manifests
-local GUILD_ROSTER_MIN_INTERVAL = 60  -- Min seconds between roster-triggered manifests
+local GUILD_ROSTER_STORM_RANDOM_DELAY_RANGE = {60, 180}  -- Random delay range (seconds) for roster-triggered manifests
+local GUILD_ROSTER_MIN_INTERVAL = 300  -- Min seconds between roster-triggered manifests
 local MANIFEST_DEBOUNCE_SECONDS = 2  -- Debounce time for manifest broadcasts (coalescing rapid events)
-local MANIFEST_HEARTBEAT_INTERVAL = 900  -- Send manifest every 15 minutes if no other activity
+local MANIFEST_HEARTBEAT_INTERVAL = 3600 -- Send manifest every 60 minutes if no other activity
 local HEARTBEAT_TICKER_INTERVAL = 60  -- Check heartbeat every minute
 local CHARS_PER_MESSAGE = 4  -- Max characters to send in one CHARS_UPDATE message
 
