@@ -99,7 +99,7 @@ local function ParseMessage(encoded)
 
 	-- Normalize short keys to verbose keys (forward compatibility)
 	data = NormalizeKeys(data)
-	
+
 	-- Extract message type from decoded data
 	local messageType = data.type
 	if not messageType or messageType == "" then
@@ -585,6 +585,68 @@ local function HandleGossipRequest(sender, data)
 	end
 end
 
+--- Handle incoming POSITION_UPDATE message (CBOR format)
+--- Validates required fields (battleTag, x, y, mapID, neighborhoodGUID, timestamp),
+--- then caches via PositionService.Set(). Logs errors to PREFIX_ERROR on failure.
+--- @param sender string The sender's character name
+--- @param data table The decoded message data
+local function HandlePositionUpdate(sender, data)
+	if not data then
+		return
+	end
+
+	local battleTag = data.battleTag
+	local x = data.x
+	local y = data.y
+	local mapID = data.mapID
+	local neighborhoodGUID = data.neighborhoodGUID
+	local timestamp = data.timestamp
+
+	-- Validate battleTag: non-empty string
+	if type(battleTag) ~= "string" or battleTag == "" then
+		print(ERROR .. string.format(" POSITION_UPDATE from %s: invalid or missing battleTag", sender))
+		return
+	end
+
+	-- Validate x, y are numbers (float/integer accepted)
+	if type(x) ~= "number" then
+		print(ERROR .. string.format(" POSITION_UPDATE from %s: invalid x (got %s)", sender, tostring(x)))
+		return
+	end
+	if type(y) ~= "number" then
+		print(ERROR .. string.format(" POSITION_UPDATE from %s: invalid y (got %s)", sender, tostring(y)))
+		return
+	end
+
+	-- Validate mapID is a non-negative integer
+	if type(mapID) ~= "number" or mapID < 0 or math.floor(mapID) ~= mapID then
+		print(ERROR .. string.format(" POSITION_UPDATE from %s: invalid mapID (got %s)", sender, tostring(mapID)))
+		return
+	end
+
+	-- Validate neighborhoodGUID: non-empty string
+	if type(neighborhoodGUID) ~= "string" or neighborhoodGUID == "" then
+		print(ERROR .. string.format(" POSITION_UPDATE from %s: invalid or missing neighborhoodGUID", sender))
+		return
+	end
+
+	-- Validate timestamp
+	if not timestamp or not ValidateTimestamp(timestamp) then
+		print(ERROR .. string.format(" POSITION_UPDATE from %s: invalid timestamp (got %s)", sender, tostring(timestamp)))
+		return
+	end
+
+	-- Cache the position
+	local position = {
+		x = x,
+		y = y,
+		mapID = mapID,
+		neighborhoodGUID = neighborhoodGUID,
+		classFile = data.classFile,  -- Optional class file for colored dots
+	}
+	ns.PositionService.Set(battleTag, position, timestamp)
+end
+
 --- Route message to appropriate handler
 --- @param messageType MessageType The message type
 --- @param sender string The sender's character name
@@ -605,6 +667,8 @@ local function RouteMessage(messageType, sender, data)
 		HandleGossipDigest(sender, data)
 	elseif messageType == MSG_TYPE.GOSSIP_REQUEST then
 		HandleGossipRequest(sender, data)
+	elseif messageType == MSG_TYPE.POSITION_UPDATE then
+		HandlePositionUpdate(sender, data)
 	end
 end
 
@@ -624,6 +688,7 @@ function Protocol.OnAddonMessage(prefix, message, channel, sender)
 	-- Ignore our own messages in release builds (helpful for testing in alpha)
 	local playerName = UnitName("player")
 	if sender == playerName then
+		DebugPrint(string.format("[Protocol] Ignoring own message from %s", sender))
 		return
 	end
 	--@end-non-alpha@]===]
@@ -633,5 +698,6 @@ function Protocol.OnAddonMessage(prefix, message, channel, sender)
 		return
 	end
 	
+	DebugPrint(string.format("[Protocol] Processing message type=%s from sender=%s", tostring(messageType), sender))
 	RouteMessage(messageType, sender, data)
 end

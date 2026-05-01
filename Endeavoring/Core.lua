@@ -12,33 +12,33 @@ local function InitializeTabSystem(frame)
 	-- Apply TabSystemOwnerMixin to main frame
 	Mixin(frame, TabSystemOwnerMixin)
 	TabSystemOwnerMixin.OnLoad(frame)
-	
+
 	-- Create TabSystem child frame programmatically
 	local tabSystem = CreateFrame("Frame", nil, frame, "HorizontalLayoutFrame")
 	Mixin(tabSystem, TabSystemMixin)
-	
+
 	-- Configure TabSystem properties BEFORE OnLoad (used during initialization)
 	tabSystem.minTabWidth = 100
 	tabSystem.maxTabWidth = 150
 	tabSystem.tabTemplate = "TabSystemTopButtonTemplate"
 	tabSystem.spacing = 1
 	tabSystem.tabSelectSound = SOUNDKIT.IG_CHARACTER_INFO_TAB
-	
+
 	-- Initialize TabSystem (creates frame pool with tabTemplate)
 	tabSystem:OnLoad()
-	
+
 	-- Position TabSystem below header (hanging off top)
 	tabSystem:SetPoint("BOTTOMLEFT", frame.header, "BOTTOMLEFT", 8, -2)
-	
+
 	-- Link TabSystem to frame
 	frame.TabSystem = tabSystem
 	frame:SetTabSystem(tabSystem)
-	
+
 	-- Register tabs with their content frames
 	frame.tasksTabID = frame:AddNamedTab(L["Tasks"], ns.Tasks.CreateTab(frame))
 	frame.leaderboardTabID = frame:AddNamedTab(L["Leaderboard"], ns.Leaderboard.CreateTab(frame))
 	frame.activityTabID = frame:AddNamedTab(L["Activity"], ns.Activity.CreateTab(frame))
-	
+
 	-- Hook tab selection to save preference
 	local originalSetTab = frame.SetTab
 	frame.SetTab = function(self, tabID, ...)
@@ -47,7 +47,7 @@ local function InitializeTabSystem(frame)
 			ns.Settings.SaveLastTab(tabID)
 		end
 	end
-	
+
 	-- Set initial tab based on user preference
 	local startupTab = frame.tasksTabID  -- Default to Tasks
 	if ns.Settings then
@@ -81,10 +81,10 @@ local function CreateMainFrame()
 	frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
 	frame:SetFrameStrata("DIALOG")
 	frame:SetClampedToScreen(true)
-	
+
 	-- Register with UISpecialFrames to allow ESC key to close
 	tinsert(UISpecialFrames, "EndeavoringFrame")
-	
+
 	-- Settings gear button next to close button
 	local settingsButton = CreateFrame("Button", nil, frame)
 	settingsButton:SetFrameLevel(EndeavoringFrameCloseButton:GetFrameLevel())
@@ -142,6 +142,7 @@ ns.RefreshInitiativeUI = RefreshInitiativeUI
 
 local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+eventFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_HOUSE_LIST_UPDATED")
 eventFrame:RegisterEvent("NEIGHBORHOOD_INITIATIVE_UPDATED")
@@ -153,10 +154,10 @@ eventFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 eventFrame:SetScript("OnEvent", function(_, event, ...)
 	if event == "PLAYER_ENTERING_WORLD" then
 		local isLogin, isReload = ...
-		
+
 		-- Initialize database
 		ns.DB.Init()
-		
+
 		-- Initialize sync service
 		ns.AddonMessages.Init()
 		ns.AddonMessages.RegisterListener()
@@ -174,7 +175,104 @@ eventFrame:SetScript("OnEvent", function(_, event, ...)
 
 		ns.API.ViewActiveNeighborhood()
 		RunNextFrame(function() ns.API.RequestPlayerHouses() end)
-		
+
+		-- Join neighborhood position channel and initialize neighborhood-scoped services (if in a neighborhood zone)
+		RunNextFrame(function()
+			-- Use C_Housing.GetCurrentNeighborhoodGUID() to check if player is actually IN a neighborhood zone
+			-- (not just if a neighborhood is "active" via the Initiative system)
+			local currentZoneGuid = C_Housing and C_Housing.GetCurrentNeighborhoodGUID and C_Housing.GetCurrentNeighborhoodGUID()
+			if currentZoneGuid then
+				DebugPrint(string.format("[Core] PLAYER_ENTERING_WORLD — in neighborhood zone GUID=%s, initializing position services", tostring(currentZoneGuid)))
+
+				-- Initialize position cache service (starts cleanup timer)
+				if ns.PositionService and ns.PositionService.Init then
+					ns.PositionService.Init()
+				end
+
+				-- Initialize NeighborhoodMap overlay (creates frame, hooks WorldMapFrame show/hide,
+				-- registers PositionService change listener for on-demand re-render).
+				if ns.NeighborhoodMap and ns.NeighborhoodMap.Init then
+					ns.NeighborhoodMap.Init()
+				end
+
+				-- Initialize NeighborhoodMinimap overlay (creates frame anchored to Minimap,
+				-- registers PositionService change listener for real-time re-render).
+				if ns.NeighborhoodMinimap and ns.NeighborhoodMinimap.Init then
+					ns.NeighborhoodMinimap.Init()
+				end
+
+				-- Initialize position broadcaster (registers PLAYER_STARTED_MOVING handler internally;
+				-- debounce is handled inside PositionBroadcaster — Core just calls Init here.
+				-- Event flow: PLAYER_STARTED_MOVING → PositionBroadcaster.OnPlayerMoving (debounce)
+				--             → PositionBroadcaster.BroadcastPosition fires ~1.5s after last move)
+				if ns.PositionBroadcaster and ns.PositionBroadcaster.Init then
+					ns.PositionBroadcaster.Init()
+				end
+
+				-- Join neighborhood position channel
+				if ns.Position and ns.Position.JoinNeighborhood then
+					ns.Position.JoinNeighborhood(currentZoneGuid)
+				end
+			else
+				DebugPrint("[Core] PLAYER_ENTERING_WORLD — not in a neighborhood zone; skipping position services initialization")
+			end
+		end)
+
+		return
+	end
+
+	if event == "ZONE_CHANGED_NEW_AREA" then
+		-- Use C_Housing.GetCurrentNeighborhoodGUID() to check if player is actually IN a neighborhood zone
+		local newZoneGuid = C_Housing and C_Housing.GetCurrentNeighborhoodGUID and C_Housing.GetCurrentNeighborhoodGUID()
+		local oldGuid = ns.Position.GetActiveNeighborhoodGUID()
+
+		if newZoneGuid ~= oldGuid then
+			DebugPrint(string.format(
+				"[Core] ZONE_CHANGED_NEW_AREA — neighborhood zone changed: old=%s new=%s",
+				tostring(oldGuid), tostring(newZoneGuid)
+			))
+			if oldGuid then
+				-- Leaving a neighborhood: shutdown position services
+				if ns.PositionBroadcaster and ns.PositionBroadcaster.Shutdown then
+					ns.PositionBroadcaster.Shutdown()
+				end
+				if ns.NeighborhoodMap and ns.NeighborhoodMap.Shutdown then
+					ns.NeighborhoodMap.Shutdown()
+				end
+				if ns.NeighborhoodMinimap and ns.NeighborhoodMinimap.Shutdown then
+					ns.NeighborhoodMinimap.Shutdown()
+				end
+				if ns.PositionService and ns.PositionService.Shutdown then
+					ns.PositionService.Shutdown()
+				end
+				if ns.Position and ns.Position.LeaveNeighborhood then
+					ns.Position.LeaveNeighborhood(oldGuid)
+				end
+			end
+			if newZoneGuid then
+				-- Entering a neighborhood: initialize position services
+				if ns.PositionService and ns.PositionService.Init then
+					ns.PositionService.Init()
+				end
+				if ns.NeighborhoodMap and ns.NeighborhoodMap.Init then
+					ns.NeighborhoodMap.Init()
+				end
+				if ns.NeighborhoodMinimap and ns.NeighborhoodMinimap.Init then
+					ns.NeighborhoodMinimap.Init()
+				end
+				if ns.PositionBroadcaster and ns.PositionBroadcaster.Init then
+					ns.PositionBroadcaster.Init()
+				end
+				if ns.Position and ns.Position.JoinNeighborhood then
+					ns.Position.JoinNeighborhood(newZoneGuid)
+				end
+			end
+		else
+			DebugPrint(string.format(
+				"[Core] ZONE_CHANGED_NEW_AREA — same neighborhood zone GUID=%s; no channel change",
+				tostring(newZoneGuid)
+			))
+		end
 		return
 	end
 
@@ -204,12 +302,12 @@ eventFrame:SetScript("OnEvent", function(_, event, ...)
 	if event == "INITIATIVE_COMPLETED" or event == "INITIATIVE_TASK_COMPLETED" then
 		RefreshInitiativeUI()
 	end
-	
+
 	if event == "INITIATIVE_ACTIVITY_LOG_UPDATED" then
 		-- Activity log has been loaded/updated
 		ns.ActivityLogCache.OnActivityLogUpdated()
 	end
-	
+
 	if event == "GUILD_ROSTER_UPDATE" then
 		-- Debounced broadcast on guild roster changes (with random delay)
 		ns.Coordinator.OnGuildRosterUpdate()
@@ -218,7 +316,7 @@ eventFrame:SetScript("OnEvent", function(_, event, ...)
 	if event == "UNIT_SPELLCAST_SUCCEEDED" then
 		local unit, _, spellID = ...
 		if unit == "player" and spellID == ns.Constants.ENDEAVOR_COFFER_SPELL_ID then
-			-- Player just opened the Endeavor Coffer — auto-mark as claimed
+			-- Player just opened the Endeavor Coffer - auto-mark as claimed
 			local ok, err = pcall(ns.Header.AutoClaimChest)
 			if not ok then
 				DebugPrint(string.format(L["FMT_DBG_AutoClaimChestFailed"], tostring(err)))

@@ -21,6 +21,7 @@ local ns = select(2, ...)
 ---@field global.profiles table<string, Profile> Synced profiles from other players (keyed by BattleTag)
 ---@field global.gossipTracking table<string, table<string, {au: number, cu: number, cc: number}>> Content-aware gossip tracking
 ---@field global.version number Schema version for migrations
+---@field global.positionOptOut boolean When true, position is not broadcast and incoming positions are not rendered
 
 -- See .github/docs/database-schema.md for detailed schema documentation
 
@@ -38,6 +39,7 @@ local DEFAULT_DB = {
 		gossipTracking = {},  -- Content-aware gossip tracking: [targetBTag][profileBTag] = {au, cu, cc}
 		claimedChests = {},  -- Keyed by "initiativeID:cycleID", true when player has claimed that cycle's chest
 		verboseDebug = false,
+		positionOptOut = false,  -- When true, position is not broadcast and incoming positions are not rendered
 		settings = nil,  -- User preferences
 		lastSelectedTab = nil,  -- Remember last tab (1=Tasks, 2=Leaderboard, 3=Activity)
 		version = 1
@@ -78,6 +80,10 @@ function DB.Init()
 
 	if not EndeavoringDB.global.claimedChests then
 		EndeavoringDB.global.claimedChests = {}
+	end
+
+	if EndeavoringDB.global.positionOptOut == nil then
+		EndeavoringDB.global.positionOptOut = false
 	end
 
 	-- myProfile will be initialized on first character login
@@ -694,5 +700,23 @@ function DB.SetLastSelectedTab(tabID)
 	end
 	
 	EndeavoringDB.global.lastSelectedTab = tabID
+end
+
+--- Get position opt-out setting
+--- @return boolean enabled Whether position opt-out is enabled
+function DB.IsPositionOptOut()
+	if not EndeavoringDB or not EndeavoringDB.global then
+		return false
+	end
+	return EndeavoringDB.global.positionOptOut or false
+end
+
+--- Set position opt-out setting
+--- @param enabled boolean Whether to enable position opt-out
+function DB.SetPositionOptOut(enabled)
+	if not EndeavoringDB or not EndeavoringDB.global then
+		return
+	end
+	EndeavoringDB.global.positionOptOut = enabled
 end
 

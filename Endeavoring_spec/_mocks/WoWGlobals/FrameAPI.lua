@@ -68,7 +68,7 @@ _G.CreateFrame = _G.CreateFrame or function(frameType, name, parent, template)
 	function frame:SetFrameStrata(s) self._strata = s end
 	function frame:GetFrameStrata() return self._strata end
 	function frame:SetFrameLevel(l) self._level = l end
-	function frame:GetFrameLevel() return self._level end
+	function frame:GetFrameLevel() return self._level or 0 end
 
 	-- Mouse/interaction
 	function frame:EnableMouse() end
@@ -165,10 +165,13 @@ end
 
 -- Tooltip stubs
 _G.GameTooltip = _G.GameTooltip or {
-	SetOwner = function() end,
-	Show = function() end,
-	Hide = function() end,
-	AddLine = function() end,
+	_owner = nil,
+	SetOwner = function(self, owner) self._owner = owner end,
+	GetOwner = function(self) return self._owner end,
+	SetText  = function() end,
+	Show     = function() end,
+	Hide     = function() end,
+	AddLine  = function() end,
 	ClearLines = function() end,
 }
 _G.GameTooltip_SetTitle = _G.GameTooltip_SetTitle or function() end
@@ -191,6 +194,26 @@ _G.Mixin = _G.Mixin or function(target, ...)
 	end
 	return target
 end
+
+-- CreateFromMixins: creates a new table from one or more mixins
+_G.CreateFromMixins = _G.CreateFromMixins or function(...)
+	return Mixin({}, ...)
+end
+
+-- MapCanvas base mixins (stubbed for load-order safety)
+_G.MapCanvasDataProviderMixin = _G.MapCanvasDataProviderMixin or {
+	OnAdded = function() end,
+	OnRemoved = function() end,
+	RefreshAllData = function() end,
+	RemoveAllData = function() end,
+	GetMap = function(self) return self.owningMap end,
+}
+_G.MapCanvasPinMixin = _G.MapCanvasPinMixin or {
+	OnReleased = function() end,
+	SetScalingLimits = function() end,
+	UseFrameLevelType = function() end,
+	SetPosition = function() end,
+}
 
 -- Tab system mixins (used by Core.lua's InitializeTabSystem)
 _G.TabSystemOwnerMixin = _G.TabSystemOwnerMixin or {

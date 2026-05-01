@@ -79,6 +79,7 @@ ns.MSG_TYPE = {
 	CHARS_UPDATE = "C",
 	GOSSIP_DIGEST = "G",
 	GOSSIP_REQUEST = "GR",
+	POSITION_UPDATE = "P",
 }
 
 --- Short wire keys for CBOR messages.
@@ -104,6 +105,13 @@ ns.SK = {
 	addedAt = "d",
 	-- Gossip digest
 	entries = "e",
+	-- Position update
+	x = "px",
+	y = "py",
+	mapID = "mi",
+	neighborhoodGUID = "ng",
+	timestamp = "ts",
+	classFile = "cf",
 }
 
 ns.state = ns.state or {
@@ -123,4 +131,20 @@ function ns.DebugPrint(message, color)
 	
 	color = color or "00ff00" -- Green by default
 	print(string.format("|cff%s%s:|r %s", color, addonName, message))
+end
+
+--- Return a human-readable tooltip label for a position entry.
+--- Priority: alias (user-set display name) → battleTag (always available).
+--- @param entry table Position entry from PositionService (must have .battleTag)
+--- @return string label
+function ns.GetTooltipLabel(entry)
+	if not entry then return "?" end
+	local battleTag = entry.battleTag or "?"
+	if ns.DB and ns.DB.GetAlias then
+		local alias = ns.DB.GetAlias(battleTag)
+		if alias and alias ~= "" and alias ~= battleTag then
+			return alias
+		end
+	end
+	return battleTag
 end

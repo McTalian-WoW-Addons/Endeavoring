@@ -86,4 +86,6 @@ L["TIP_RememberLastTab"] = "Resume where you left off, even after /reload or log
 L["TIP_ViewAddonInfo"] = "View version, author, and attribution information"
 L["Total"] = "Total"
 L["View Addon Info"] = "View Addon Info"
+L["Position Opt-Out"] = "Position Opt-Out"
+L["TIP_PositionOptOut"] = "When enabled, your position is not broadcast to other players, incoming positions are not shown on your map, and the addon does not join the neighborhood position channel. Enable this if you prefer not to share or receive real-time location data."
 --#endregion

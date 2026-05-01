@@ -157,6 +157,9 @@ _G.hash_SlashCmdList = _G.hash_SlashCmdList or {}
 -- C_Timer.After (HousingDashboard.lua uses this alongside NewTimer/NewTicker)
 _G.C_Timer = _G.C_Timer or {}
 _G.C_Timer.After = _G.C_Timer.After or function(delay, callback) end
+_G.C_Timer.NewTicker = _G.C_Timer.NewTicker or function(interval, callback)
+	return { Cancel = function() end }
+end
 
 -- tinsert global alias (Core.lua)
 _G.tinsert = _G.tinsert or table.insert
