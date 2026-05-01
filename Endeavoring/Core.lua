@@ -214,7 +214,7 @@ eventFrame:SetScript("OnEvent", function(_, event, ...)
 					ns.Position.JoinNeighborhood(currentZoneGuid)
 				end
 			else
-				DebugPrint("[Core] PLAYER_ENTERING_WORLD — not in a neighborhood zone; skipping position services initialization")
+				DebugPrint("[Core] PLAYER_ENTERING_WORLD — not in a neighborhood zone; skipping position services initialization") -- nocheck
 			end
 		end)
 

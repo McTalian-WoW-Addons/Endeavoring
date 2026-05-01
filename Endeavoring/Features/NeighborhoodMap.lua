@@ -126,7 +126,7 @@ function NeighborhoodMap.Init()
 	if initialized then return end
 
 	if ns.Settings and ns.Settings.GetPositionOptOut and ns.Settings.GetPositionOptOut() then
-		DebugPrint("[NeighborhoodMap] Init skipped — position opt-out is enabled")
+		DebugPrint("[NeighborhoodMap] Init skipped — position opt-out is enabled") -- nocheck
 		return
 	end
 
@@ -159,7 +159,7 @@ function NeighborhoodMap.Init()
 		end)
 	end
 
-	DebugPrint("[NeighborhoodMap] Initialized — data provider registered")
+	DebugPrint("[NeighborhoodMap] Initialized — data provider registered") -- nocheck
 end
 
 --- Force a refresh (e.g. called from commands or tests).
@@ -177,7 +177,7 @@ function NeighborhoodMap.Shutdown()
 		dataProvider = nil
 	end
 	initialized = false
-	DebugPrint("[NeighborhoodMap] Shutdown complete")
+	DebugPrint("[NeighborhoodMap] Shutdown complete") -- nocheck
 end
 
 --- Return diagnostic snapshot.

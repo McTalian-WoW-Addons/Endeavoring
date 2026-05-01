@@ -15,7 +15,7 @@ specific neighborhood. One player can be in at most one neighborhood channel
 at a time; joining a new neighborhood first leaves the previous one.
 
 CHANNEL NAMING (deterministic):
-  Channel name = "Ndvrng" .. guid.gsub("[^%w]", "")
+  Channel name = "Ndvrng" .. guid.gsub("[^%w]", "") -- nocheck
   Example: "NdvrngHousing422996E58" for GUID "Housing-4-2-2996-E58"
 All players in the same neighborhood derive the same channel name from the
 GUID, so JoinChannelByName acts as a create-or-join operation.
@@ -51,7 +51,7 @@ local DebugPrint = ns.DebugPrint
 -- e.g. "Housing-4-2-2996-E58" → "NdvrngHousing422996E58"
 -- This is deterministic, collision-free, and avoids the dashes that caused
 -- channel join issues with WoW's custom channel API.
-local CHANNEL_NAME_PREFIX = "Ndvrng"
+local CHANNEL_NAME_PREFIX = "Ndvrng" -- nocheck
 
 -- State: only one active neighborhood channel at a time
 local activeNeighborhoodGUID    = nil  -- GUID of the currently joined neighborhood
@@ -111,7 +111,7 @@ function Position.JoinNeighborhood(neighborhoodGUID)
 
 	-- Skip channel join when the player has opted out of position sharing
 	if ns.Settings and ns.Settings.GetPositionOptOut and ns.Settings.GetPositionOptOut() then
-		DebugPrint("[Position] JoinNeighborhood skipped — position opt-out is enabled (GUID=" .. neighborhoodGUID .. ")")
+		DebugPrint("[Position] JoinNeighborhood skipped — position opt-out is enabled (GUID=" .. neighborhoodGUID .. ")") -- nocheck
 		return
 	end
 

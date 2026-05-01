@@ -228,7 +228,7 @@ end
 --- Called from Core.lua on PLAYER_ENTERING_WORLD.
 function PositionService.Init()
 	PositionService.StartCleanupTimer()
-	DebugPrint("[PositionService] Initialized")
+	DebugPrint("[PositionService] Initialized") -- nocheck
 end
 
 --- Shutdown the service and clean up resources.
@@ -243,5 +243,5 @@ function PositionService.Shutdown()
 	-- Clear all cached positions
 	PositionService.Clear()
 
-	DebugPrint("[PositionService] Shutdown complete")
+	DebugPrint("[PositionService] Shutdown complete") -- nocheck
 end

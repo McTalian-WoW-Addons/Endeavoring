@@ -244,7 +244,7 @@ function NeighborhoodMinimap.Create()
 	-- Minimap overlay is always shown (no open/close event like WorldMapFrame)
 	parentFrame:Show()
 
-	DebugPrint("[NeighborhoodMinimap] Overlay frame created")
+	DebugPrint("[NeighborhoodMinimap] Overlay frame created") -- nocheck
 end
 
 --- Render position dots on the minimap for the given entries.
@@ -345,7 +345,7 @@ function NeighborhoodMinimap.Init()
 
 	-- Privacy opt-out: skip rendering entirely if the player has opted out
 	if ns.Settings and ns.Settings.GetPositionOptOut and ns.Settings.GetPositionOptOut() then
-		DebugPrint("[NeighborhoodMinimap] Init skipped — position opt-out is enabled")
+		DebugPrint("[NeighborhoodMinimap] Init skipped — position opt-out is enabled") -- nocheck
 		return
 	end
 
@@ -368,7 +368,7 @@ function NeighborhoodMinimap.Init()
 		end)
 	end
 
-	DebugPrint("[NeighborhoodMinimap] Initialized")
+	DebugPrint("[NeighborhoodMinimap] Initialized") -- nocheck
 end
 
 --- Shutdown the minimap overlay and clean up resources.
@@ -385,7 +385,7 @@ function NeighborhoodMinimap.Shutdown()
 	end
 
 	initialized = false
-	DebugPrint("[NeighborhoodMinimap] Shutdown complete")
+	DebugPrint("[NeighborhoodMinimap] Shutdown complete") -- nocheck
 end
 
 --- Return diagnostic snapshot for runtime inspection.

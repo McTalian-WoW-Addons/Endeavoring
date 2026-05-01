@@ -225,7 +225,7 @@ function PositionBroadcaster.Init()
 	if initialized then return end
 
 	if ns.Settings and ns.Settings.GetPositionOptOut and ns.Settings.GetPositionOptOut() then
-		DebugPrint("[PositionBroadcaster] Skipping initialization — position opt-out is enabled")
+		DebugPrint("[PositionBroadcaster] Skipping initialization — position opt-out is enabled") -- nocheck
 		return
 	end
 
@@ -242,7 +242,7 @@ function PositionBroadcaster.Init()
 
 	initialized = true
 	active      = true
-	DebugPrint("[PositionBroadcaster] Initialized (ticker=" .. TICKER_SECONDS .. "s)")
+	DebugPrint("[PositionBroadcaster] Initialized (ticker=" .. TICKER_SECONDS .. "s)") -- nocheck
 end
 
 --- Shutdown the broadcaster and clean up resources.
@@ -263,5 +263,5 @@ function PositionBroadcaster.Shutdown()
 
 	initialized = false
 	active      = false
-	DebugPrint("[PositionBroadcaster] Shutdown complete")
+	DebugPrint("[PositionBroadcaster] Shutdown complete") -- nocheck
 end

@@ -163,9 +163,9 @@ function Settings.Register()
 			local function SetValue(value)
 				Settings.SetPositionOptOut(value)
 				if value then
-					ns.DebugPrint("Position opt-out enabled: position will not be broadcast and incoming positions will not be rendered.")
+					ns.DebugPrint("Position opt-out enabled: position will not be broadcast and incoming positions will not be rendered.") -- nocheck
 				else
-					ns.DebugPrint("Position opt-out disabled: position sharing is active.")
+					ns.DebugPrint("Position opt-out disabled: position sharing is active.") -- nocheck
 				end
 			end
 
