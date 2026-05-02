@@ -38,7 +38,7 @@ LIFECYCLE:
 
 -- Constants
 local STALE_THRESHOLD_SECONDS = 60
-local CLEANUP_INTERVAL_SECONDS = 30
+local CLEANUP_INTERVAL_SECONDS = 15
 
 -- Shortcuts
 local ERROR = ns.Constants and ns.Constants.PREFIX_ERROR or ("|cffff0000" .. addonName .. ":|r")
@@ -68,6 +68,7 @@ local function CountStale()
 end
 
 --- Core cleanup: removes entries older than STALE_THRESHOLD_SECONDS.
+--- Notifies change listeners when entries are removed so dots disappear from map/minimap.
 local function RunCleanup()
 	local now = time()
 	local removed = 0
@@ -79,6 +80,13 @@ local function RunCleanup()
 	end
 	if removed > 0 then
 		DebugPrint(string.format("[PositionService] Cleaned up %d stale position(s)", removed))
+		-- Notify listeners so minimap/map clear the removed dots immediately
+		for _, fn in ipairs(changeListeners) do
+			local ok, err = pcall(fn)
+			if not ok then
+				DebugPrint(string.format("%s PositionService.RunCleanup: changeListener error: %s", ERROR, tostring(err)))
+			end
+		end
 	end
 end
 
