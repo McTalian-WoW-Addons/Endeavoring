@@ -11,22 +11,29 @@ Position Broadcaster Service
 
 PURPOSE:
 Sends the player's current position over the active neighborhood channel during
-movement and on stop.
+movement and on stop, with natural stutter-step handling.
 
 BROADCAST STRATEGY:
-  PLAYER_STARTED_MOVING → broadcast immediately, then start a 1.5s repeating
-                          ticker (if not already running).
-  PLAYER_STOPPED_MOVING → cancel the ticker, broadcast immediately with the
-                          final stopped position.
+  - Single 1.5s ticker broadcasts position when pending
+  - PLAYER_STARTED_MOVING → set pending flag, start ticker (if not running),
+                            cancel any pending ticker stop
+  - PLAYER_STOPPED_MOVING → set pending flag, schedule debounced ticker stop
+  - Ticker fires → broadcast if pending, clear flag
+  - Debounce expires → stop ticker (if no new movement cancels it)
 
-This gives a smooth moving indicator (updates every 1.5s in flight) and an
-accurate final dot when the player lands.
+STUTTER-STEP HANDLING:
+Rapid stop/start cycles naturally keep the ticker alive:
+  - STARTED → pending=true, start ticker, cancel stop debounce
+  - STOPPED → pending=true, schedule stop (5s)
+  - STARTED → pending=true, start ticker (no-op), cancel stop debounce ✓
+  - STOPPED → pending=true, schedule stop (5s)
+  - After 5s with no new movement → ticker stops
 
-Why 1.5 seconds?
-- WoW's addon message throttle is roughly 1 message per second on a custom channel.
-- 1.5s gives comfortable headroom above the throttle floor.
-- Position updates at 1.5s resolution are smooth enough for a minimap overlay
-  without causing channel congestion.
+Benefits:
+  - Single controlled interval (no rapid broadcasts)
+  - Always broadcasts latest position (pending flag)
+  - Automatic stutter-step resilience (debounce keeps cancelling)
+  - CPU efficient (ticker only runs during/near movement)
 
 GUARD CONDITIONS:
 - No active neighborhood channel  → skip send, log PREFIX_ERROR
@@ -42,17 +49,20 @@ OBSERVABILITY:
 
 -- Constants
 local TICKER_SECONDS = 1.5
+local TICKER_STOP_DEBOUNCE_SECONDS = 5  -- Debounce time before stopping ticker after movement stops
 
 -- Shortcuts
 local ERROR = ns.Constants and ns.Constants.PREFIX_ERROR or ("|cffff0000" .. addonName .. ":|r")
 local DebugPrint = ns.DebugPrint
 
 -- State
-local initialized       = false
-local active            = true  -- false after Shutdown(); blocks BroadcastPosition until re-Init
-local activeTicker      = nil   -- C_Timer.NewTicker handle; non-nil means ticker is running
-local lastBroadcastTime = nil   -- unix timestamp of the most recent successful send
-local messagesSentCount = 0     -- total sends since Init()
+local initialized           = false
+local active                = true  -- false after Shutdown(); blocks BroadcastPosition until re-Init
+local activeTicker          = nil   -- C_Timer.NewTicker handle; non-nil means ticker is running
+local lastBroadcastTime     = nil   -- unix timestamp of the most recent successful send
+local messagesSentCount     = 0     -- total sends since Init()
+local pendingPosition       = false -- flag: broadcast on next ticker fire
+local tickerStopDebounceTimer = nil -- timer for debounced ticker stop
 
 -- ---------------------------------------------------------------------------
 -- Internal helpers
@@ -171,28 +181,47 @@ end
 -- ---------------------------------------------------------------------------
 
 --- Called on PLAYER_STARTED_MOVING.
---- Broadcasts immediately (t=0 sample), then starts a repeating ticker for
---- subsequent samples while movement continues. Idempotent if ticker is
---- already running.
+--- Sets pending flag, starts ticker (if not running), and cancels any pending
+--- ticker stop to keep moving indicator alive during movement.
 local function OnPlayerStartedMoving()
-	PositionBroadcaster.BroadcastPosition()
+	pendingPosition = true
 
 	if not activeTicker then
 		activeTicker = C_Timer.NewTicker(TICKER_SECONDS, function()
-			PositionBroadcaster.BroadcastPosition()
+			if pendingPosition then
+				PositionBroadcaster.BroadcastPosition()
+			end
 		end)
+	end
+
+	-- Cancel any pending ticker stop (movement resumed)
+	if tickerStopDebounceTimer then
+		tickerStopDebounceTimer:Cancel()
+		tickerStopDebounceTimer = nil
 	end
 end
 
 --- Called on PLAYER_STOPPED_MOVING.
---- Cancels the ticker and broadcasts one final accurate stopped position.
+--- Sets pending flag so the next ticker broadcasts the final stopped position,
+--- then schedules a debounced ticker stop. If movement resumes before debounce
+--- expires, this is cancelled by the next STARTED event.
 local function OnPlayerStoppedMoving()
-	if activeTicker then
-		activeTicker:Cancel()
-		activeTicker = nil
+	pendingPosition = true
+
+	-- Cancel any existing debounce timer
+	if tickerStopDebounceTimer then
+		tickerStopDebounceTimer:Cancel()
 	end
 
-	PositionBroadcaster.BroadcastPosition()
+	-- Schedule ticker stop with debounce
+	tickerStopDebounceTimer = C_Timer.NewTimer(TICKER_STOP_DEBOUNCE_SECONDS, function()
+		pendingPosition = false
+		if activeTicker then
+			activeTicker:Cancel()
+			activeTicker = nil
+		end
+		tickerStopDebounceTimer = nil
+	end)
 end
 
 -- ---------------------------------------------------------------------------
@@ -246,14 +275,19 @@ function PositionBroadcaster.Init()
 end
 
 --- Shutdown the broadcaster and clean up resources.
---- Cancels any running ticker, unregisters movement events, and marks as
---- uninitialized so Init() can be called again on re-entry.
+--- Cancels any running ticker and debounce timer, unregisters movement events,
+--- and marks as uninitialized so Init() can be called again on re-entry.
 function PositionBroadcaster.Shutdown()
 	if not initialized then return end
 
 	if activeTicker then
 		activeTicker:Cancel()
 		activeTicker = nil
+	end
+
+	if tickerStopDebounceTimer then
+		tickerStopDebounceTimer:Cancel()
+		tickerStopDebounceTimer = nil
 	end
 
 	if eventFrame then

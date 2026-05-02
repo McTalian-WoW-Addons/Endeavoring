@@ -1,9 +1,11 @@
 --- Tests for Services/PositionBroadcaster.lua
 ---
 --- Covers:
---- - PLAYER_STARTED_MOVING: broadcasts immediately and starts ticker (if not running)
---- - PLAYER_STARTED_MOVING: does not start second ticker if already running
---- - PLAYER_STOPPED_MOVING: cancels ticker and broadcasts final position
+--- - PLAYER_STARTED_MOVING: sets pending flag, starts ticker (if not running),
+---   cancels pending stop debounce
+--- - Ticker: broadcasts only when pending flag is set, clears flag after
+--- - PLAYER_STOPPED_MOVING: sets pending flag, schedules debounced ticker stop
+--- - Stutter-stepping: rapid STARTED/STOPPED cycles keep ticker alive via debounce cancellation
 --- - Message structure: BuildMessage receives payload with all required short-key fields
 --- - No-send guard: no broadcast when GetActiveChannel() returns nil neighborhoodGUID
 --- - No-send guard: no broadcast when GetBattleTag() returns nil
@@ -127,8 +129,9 @@ describe("PositionBroadcaster", function()
 	-- =========================================================================
 	describe("movement events", function()
 
-		it("PLAYER_STARTED_MOVING broadcasts once immediately", function()
+		it("PLAYER_STARTED_MOVING starts a ticker and sets pending flag", function()
 			local restore = StubPositionAPIs()
+			local tickerStarted = false
 			local broadcastCount = 0
 
 			local ns2, bc, getHandler = SetupWithFrameCapture()
@@ -137,12 +140,20 @@ describe("PositionBroadcaster", function()
 				broadcastCount = broadcastCount + 1
 				return origBroadcast()
 			end
-			_G.C_Timer.NewTicker = function() return { Cancel = function() end } end
+
+			local tickerCallback = nil
+			_G.C_Timer.NewTicker = function(interval, cb)
+				tickerStarted = true
+				tickerCallback = cb
+				return { Cancel = function() end }
+			end
 
 			getHandler()(nil, "PLAYER_STARTED_MOVING")
+			assert.is_true(tickerStarted, "STARTED should start ticker")
+			assert.are.equal(0, broadcastCount, "STARTED should NOT broadcast immediately")
+			tickerCallback()
+			assert.are.equal(1, broadcastCount, "Ticker should broadcast when pending flag is set")
 			restore()
-
-			assert.are.equal(1, broadcastCount)
 		end)
 
 		it("PLAYER_STARTED_MOVING starts a ticker", function()
@@ -196,24 +207,26 @@ describe("PositionBroadcaster", function()
 			assert.are.equal(1, tickerStartCount)
 		end)
 
-		it("PLAYER_STOPPED_MOVING cancels the running ticker", function()
+		it("PLAYER_STARTED_MOVING does not start second ticker if already running", function()
 			local restore = StubPositionAPIs()
-			local cancelCount = 0
+			local tickerStartCount = 0
 
 			local _, _, getHandler = SetupWithFrameCapture()
 			_G.C_Timer.NewTicker = function(interval, cb)
-				return { Cancel = function() cancelCount = cancelCount + 1 end }
+				tickerStartCount = tickerStartCount + 1
+				return { Cancel = function() end }
 			end
+			_G.C_Timer.NewTimer = function() return { Cancel = function() end } end
 
 			local onEvent = getHandler()
 			onEvent(nil, "PLAYER_STARTED_MOVING")
-			onEvent(nil, "PLAYER_STOPPED_MOVING")
+			onEvent(nil, "PLAYER_STARTED_MOVING")
 			restore()
 
-			assert.are.equal(1, cancelCount)
+			assert.are.equal(1, tickerStartCount)
 		end)
 
-		it("PLAYER_STOPPED_MOVING broadcasts once after cancelling ticker", function()
+		it("PLAYER_STARTED_MOVING broadcasts if pending flag is set", function()
 			local restore = StubPositionAPIs()
 			local broadcastCount = 0
 
@@ -223,16 +236,21 @@ describe("PositionBroadcaster", function()
 				broadcastCount = broadcastCount + 1
 				return origBroadcast()
 			end
-			_G.C_Timer.NewTicker = function() return { Cancel = function() end } end
+
+			local tickerCallback = nil
+			_G.C_Timer.NewTicker = function(interval, cb)
+				tickerCallback = cb
+				return { Cancel = function() end }
+			end
+			_G.C_Timer.NewTimer = function() return { Cancel = function() end } end
 
 			local onEvent = getHandler()
-			broadcastCount = 0  -- reset after STARTED fires one
+			broadcastCount = 0
 			onEvent(nil, "PLAYER_STARTED_MOVING")
-			broadcastCount = 0  -- reset; now test STOPPED alone
-			onEvent(nil, "PLAYER_STOPPED_MOVING")
+			assert.are.equal(0, broadcastCount, "STARTED should NOT broadcast immediately (pending flag instead)")
+			tickerCallback()
+			assert.are.equal(1, broadcastCount, "Ticker should broadcast when pending flag is set")
 			restore()
-
-			assert.are.equal(1, broadcastCount)
 		end)
 
 		it("PLAYER_STOPPED_MOVING with no active ticker does not error", function()
@@ -245,23 +263,68 @@ describe("PositionBroadcaster", function()
 			restore()
 		end)
 
-		it("after PLAYER_STOPPED_MOVING a new PLAYER_STARTED_MOVING starts a fresh ticker", function()
+		it("after PLAYER_STOPPED_MOVING a new PLAYER_STARTED_MOVING cancels the debounce timer", function()
 			local restore = StubPositionAPIs()
-			local tickerStartCount = 0
+			local debounceTimerCancelled = false
 
 			local _, _, getHandler = SetupWithFrameCapture()
-			_G.C_Timer.NewTicker = function(interval, cb)
-				tickerStartCount = tickerStartCount + 1
-				return { Cancel = function() end }
+			_G.C_Timer.NewTicker = function() return { Cancel = function() end } end
+			_G.C_Timer.NewTimer = function()
+				return {
+					Cancel = function()
+						debounceTimerCancelled = true
+					end,
+				}
 			end
 
 			local onEvent = getHandler()
 			onEvent(nil, "PLAYER_STARTED_MOVING")
 			onEvent(nil, "PLAYER_STOPPED_MOVING")
+			debounceTimerCancelled = false  -- Reset flag after STOPPED creates it
 			onEvent(nil, "PLAYER_STARTED_MOVING")
 			restore()
 
-			assert.are.equal(2, tickerStartCount)
+			assert.is_true(debounceTimerCancelled, "STARTED should cancel the pending stop debounce")
+		end)
+
+		it("PLAYER_STOPPED_MOVING throttles rapid broadcasts (stutter-stepping)", function()
+			local restore = StubPositionAPIs()
+			local timerStopDebounces = {}
+
+			local ns2, bc, getHandler = SetupWithFrameCapture()
+
+			local tickerCallback = nil
+			_G.C_Timer.NewTicker = function(interval, cb)
+				tickerCallback = cb
+				return { Cancel = function() end }
+			end
+
+			_G.C_Timer.NewTimer = function(delay, callback)
+				table.insert(timerStopDebounces, callback)
+				return { Cancel = function() end }
+			end
+
+			local onEvent = getHandler()
+			-- Start movement
+			onEvent(nil, "PLAYER_STARTED_MOVING")
+			assert.are.equal(0, #timerStopDebounces, "STARTED should not schedule stop debounce")
+
+			-- Stop movement
+			onEvent(nil, "PLAYER_STOPPED_MOVING")
+			assert.are.equal(1, #timerStopDebounces, "STOPPED should schedule stop debounce")
+
+			-- Rapid restart (stutter-step)
+			onEvent(nil, "PLAYER_STARTED_MOVING")
+			assert.are.equal(1, #timerStopDebounces, "STARTED should cancel and not reschedule debounce")
+
+			-- Stop again
+			onEvent(nil, "PLAYER_STOPPED_MOVING")
+			assert.are.equal(2, #timerStopDebounces, "Second STOPPED should schedule new debounce")
+
+			-- Ticker is still running (wasn't stopped)
+			assert.is_not_nil(tickerCallback, "Ticker should be running despite STOPPED events")
+
+			restore()
 		end)
 
 	end)
@@ -447,21 +510,32 @@ describe("PositionBroadcaster", function()
 			assert.are.equal("running", diag.tickerState)
 		end)
 
-		it("reports tickerState=idle after PLAYER_STOPPED_MOVING", function()
+		it("reports tickerState=idle after debounce timer fires and ticker is stopped", function()
 			local restore = StubPositionAPIs()
 
 			local ns2, bc, getHandler = SetupWithFrameCapture()
+			local timerCallback = nil
 			_G.C_Timer.NewTicker = function(interval, cb)
+				return { Cancel = function() end }
+			end
+			_G.C_Timer.NewTimer = function(delay, callback)
+				timerCallback = callback
 				return { Cancel = function() end }
 			end
 
 			local onEvent = getHandler()
 			onEvent(nil, "PLAYER_STARTED_MOVING")
-			onEvent(nil, "PLAYER_STOPPED_MOVING")
-			local diag = bc.GetDiagnostics()
-			restore()
+			local diag1 = bc.GetDiagnostics()
+			assert.are.equal("running", diag1.tickerState, "Ticker should be running after STARTED")
 
-			assert.are.equal("idle", diag.tickerState)
+			onEvent(nil, "PLAYER_STOPPED_MOVING")
+			local diag2 = bc.GetDiagnostics()
+			assert.are.equal("running", diag2.tickerState, "Ticker still running after STOPPED (debounce not expired)")
+
+			timerCallback()
+			local diag3 = bc.GetDiagnostics()
+			assert.are.equal("idle", diag3.tickerState, "Ticker should be idle after debounce expires")
+			restore()
 		end)
 
 	end)
@@ -677,27 +751,34 @@ describe("PositionBroadcaster", function()
 			assert.are.equal(1, cancelCount)
 		end)
 
-		it("unregisters movement events so PLAYER_STARTED_MOVING no longer broadcasts", function()
+		it("unregisters movement events so PLAYER_STARTED_MOVING no longer affects state", function()
 			local restore = StubPositionAPIs()
-			local broadcastCount = 0
+			local tickerCallbacks = {}
 
 			local ns2, bc, getHandler = SetupWithFrameCapture()
-			_G.C_Timer.NewTicker = function() return { Cancel = function() end } end
+			_G.C_Timer.NewTicker = function(interval, cb)
+				table.insert(tickerCallbacks, cb)
+				return { Cancel = function() end }
+			end
+			_G.C_Timer.NewTimer = function() return { Cancel = function() end } end
 
 			local origBroadcast = bc.BroadcastPosition
+			local broadcastCount = 0
 			bc.BroadcastPosition = function()
 				broadcastCount = broadcastCount + 1
 				return origBroadcast()
 			end
 
-			-- Fire a movement event before shutdown — should broadcast
+			-- Fire a movement event before shutdown
 			getHandler()(nil, "PLAYER_STARTED_MOVING")
-			assert.are.equal(1, broadcastCount)
+			assert.are.equal(1, #tickerCallbacks, "Ticker should be created")
+			tickerCallbacks[1]()
+			assert.are.equal(1, broadcastCount, "Ticker should broadcast after STARTED")
 
 			bc.Shutdown()
 
-			-- After shutdown the frame is unregistered; subsequent events are no-ops
-			-- We verify by calling Shutdown and checking diagnostics show idle state
+			-- After shutdown, ticker is cancelled and can't be used
+			-- Verify by checking diagnostics show idle state
 			assert.are.equal("idle", bc.GetDiagnostics().tickerState)
 		end)
 
