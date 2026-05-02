@@ -13,6 +13,11 @@ local L = ns.L
 --- To add translations, simply uncomment the line(s) and replace the English text
 --- after the equal sign (=) with the translated value.
 
+--#region v1.4.0
+L["Position Opt-Out"] = "Position Opt-Out"
+L["TIP_PositionOptOut"] = "When enabled, your position is not broadcast to other players, incoming positions are not shown on your map, and the addon does not join the neighborhood position channel. Enable this if you prefer not to share or receive real-time location data."
+--#endregion
+
 --#region v1.3.0
 L["1 day ago"] = "1 day ago"
 L["1 Hour"] = "1 Hour"
@@ -65,7 +70,6 @@ L["No tasks available"] = "No tasks available"
 L["Open Endeavoring settings panel"] = "Open Endeavoring settings panel"
 L["Player"] = "Player"
 L["Player Alias"] = "Player Alias"
-L["Position Opt-Out"] = "Position Opt-Out"
 L["Rank"] = "Rank"
 L["Remember Last Tab"] = "Remember Last Tab"
 L["Rewards:"] = "Rewards:"
@@ -83,7 +87,6 @@ L["TIP_ChestIndicator"] = "Visit the chest next to the neighborhood bulletin boa
 L["TIP_ChestRightClick"] = "Right-click to dismiss manually."
 L["TIP_DefaultTab"] = "Which tab to open when 'Remember Last Tab' is disabled. This setting is ignored when remembering your last tab."
 L["TIP_EnableDebugLogs"] = "Show detailed debug information in chat to help troubleshoot issues"
-L["TIP_PositionOptOut"] = "When enabled, your position is not broadcast to other players, incoming positions are not shown on your map, and the addon does not join the neighborhood position channel. Enable this if you prefer not to share or receive real-time location data."
 L["TIP_RememberLastTab"] = "Resume where you left off, even after /reload or logout. When enabled, this overrides the Default Tab setting below."
 L["TIP_ViewAddonInfo"] = "View version, author, and attribution information"
 L["Total"] = "Total"
