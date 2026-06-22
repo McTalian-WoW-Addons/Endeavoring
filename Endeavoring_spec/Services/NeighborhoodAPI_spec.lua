@@ -17,25 +17,43 @@ describe("NeighborhoodAPI", function()
 
 		-- Default C_NeighborhoodInitiative stub
 		_G.C_NeighborhoodInitiative = {
-			GetNeighborhoodInitiativeInfo = function() return nil end,
-			IsInitiativeEnabled = function() return false end,
-			GetActiveNeighborhood = function() return nil end,
+			GetNeighborhoodInitiativeInfo = function()
+				return nil
+			end,
+			IsInitiativeEnabled = function()
+				return false
+			end,
+			GetActiveNeighborhood = function()
+				return nil
+			end,
 			RequestNeighborhoodInitiativeInfo = function() end,
-			GetInitiativeActivityLogInfo = function() return nil end,
+			GetInitiativeActivityLogInfo = function()
+				return nil
+			end,
 			RequestInitiativeActivityLog = function() end,
-			GetQuestRewardHouseXp = function() return nil end,
+			GetQuestRewardHouseXp = function()
+				return nil
+			end,
 			SetViewingNeighborhood = function() end,
 			SetActiveNeighborhood = function() end,
-			IsViewingActiveNeighborhood = function() return false end,
+			IsViewingActiveNeighborhood = function()
+				return false
+			end,
 		}
 
 		_G.C_Housing = {
-			GetPlayerOwnedHouses = function() return {} end,
-			GetCurrentNeighborhoodGUID = function() return nil end,
+			GetPlayerOwnedHouses = function()
+				return {}
+			end,
+			GetCurrentNeighborhoodGUID = function()
+				return nil
+			end,
 		}
 
 		_G.C_QuestInfoSystem = {
-			GetQuestLogRewardFavor = function() return nil end,
+			GetQuestLogRewardFavor = function()
+				return nil
+			end,
 		}
 
 		nsMocks.LoadAddonFile("Endeavoring/Services/NeighborhoodAPI.lua", ns)
@@ -51,7 +69,9 @@ describe("NeighborhoodAPI", function()
 
 		it("returns initiative info when available", function()
 			local info = { title = "Test Endeavor", currentProgress = 50, progressRequired = 100 }
-			_G.C_NeighborhoodInitiative.GetNeighborhoodInitiativeInfo = function() return info end
+			_G.C_NeighborhoodInitiative.GetNeighborhoodInitiativeInfo = function()
+				return info
+			end
 			assert.same(info, ns.API.GetInitiativeInfo())
 		end)
 
@@ -70,7 +90,9 @@ describe("NeighborhoodAPI", function()
 		end)
 
 		it("returns true when enabled", function()
-			_G.C_NeighborhoodInitiative.IsInitiativeEnabled = function() return true end
+			_G.C_NeighborhoodInitiative.IsInitiativeEnabled = function()
+				return true
+			end
 			assert.is_true(ns.API.IsInitiativeActive())
 		end)
 
@@ -179,7 +201,9 @@ describe("NeighborhoodAPI", function()
 
 		it("returns favor value when available", function()
 			_G.C_QuestInfoSystem.GetQuestLogRewardFavor = function(questID, index)
-				if questID == 12345 then return 500 end
+				if questID == 12345 then
+					return 500
+				end
 				return nil
 			end
 			assert.equals(500, ns.API.GetQuestRewardHouseXp(12345))
@@ -208,7 +232,9 @@ describe("NeighborhoodAPI", function()
 
 		it("returns activity log when available", function()
 			local log = { isLoaded = true, taskActivity = {} }
-			_G.C_NeighborhoodInitiative.GetInitiativeActivityLogInfo = function() return log end
+			_G.C_NeighborhoodInitiative.GetInitiativeActivityLogInfo = function()
+				return log
+			end
 			assert.same(log, ns.API.GetActivityLogInfo())
 		end)
 	end)
@@ -223,24 +249,38 @@ describe("NeighborhoodAPI", function()
 		end)
 
 		it("returns true when already viewing active neighborhood", function()
-			_G.C_NeighborhoodInitiative.IsViewingActiveNeighborhood = function() return true end
+			_G.C_NeighborhoodInitiative.IsViewingActiveNeighborhood = function()
+				return true
+			end
 			assert.is_true(ns.API.ViewActiveNeighborhood())
 		end)
 
 		it("sets viewing neighborhood when active neighborhood found", function()
 			local viewedGUID
-			_G.C_NeighborhoodInitiative.GetActiveNeighborhood = function() return "guid-123" end
-			_G.C_NeighborhoodInitiative.SetViewingNeighborhood = function(guid) viewedGUID = guid end
+			_G.C_NeighborhoodInitiative.GetActiveNeighborhood = function()
+				return "guid-123"
+			end
+			_G.C_NeighborhoodInitiative.SetViewingNeighborhood = function(guid)
+				viewedGUID = guid
+			end
 			assert.is_true(ns.API.ViewActiveNeighborhood())
 			assert.equals("guid-123", viewedGUID)
 		end)
 
 		it("falls back to current neighborhood GUID when active not found", function()
 			local viewedGUID, activatedGUID
-			_G.C_NeighborhoodInitiative.GetActiveNeighborhood = function() return nil end
-			_G.C_Housing.GetCurrentNeighborhoodGUID = function() return "fallback-guid" end
-			_G.C_NeighborhoodInitiative.SetActiveNeighborhood = function(guid) activatedGUID = guid end
-			_G.C_NeighborhoodInitiative.SetViewingNeighborhood = function(guid) viewedGUID = guid end
+			_G.C_NeighborhoodInitiative.GetActiveNeighborhood = function()
+				return nil
+			end
+			_G.C_Housing.GetCurrentNeighborhoodGUID = function()
+				return "fallback-guid"
+			end
+			_G.C_NeighborhoodInitiative.SetActiveNeighborhood = function(guid)
+				activatedGUID = guid
+			end
+			_G.C_NeighborhoodInitiative.SetViewingNeighborhood = function(guid)
+				viewedGUID = guid
+			end
 
 			assert.is_true(ns.API.ViewActiveNeighborhood())
 			assert.equals("fallback-guid", viewedGUID)
@@ -248,8 +288,12 @@ describe("NeighborhoodAPI", function()
 		end)
 
 		it("returns false when no neighborhood found at all", function()
-			_G.C_NeighborhoodInitiative.GetActiveNeighborhood = function() return nil end
-			_G.C_Housing.GetCurrentNeighborhoodGUID = function() return nil end
+			_G.C_NeighborhoodInitiative.GetActiveNeighborhood = function()
+				return nil
+			end
+			_G.C_Housing.GetCurrentNeighborhoodGUID = function()
+				return nil
+			end
 			assert.is_false(ns.API.ViewActiveNeighborhood())
 		end)
 	end)

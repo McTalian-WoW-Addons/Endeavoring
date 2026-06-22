@@ -58,7 +58,7 @@ local function Rebuild()
 		cache = {}
 
 		local allProfiles = ns.DB.GetAllProfiles()
-		
+
 		for battleTag, profile in pairs(allProfiles) do
 			if profile.characters then
 				for _, char in pairs(profile.characters) do
@@ -66,7 +66,7 @@ local function Rebuild()
 				end
 			end
 		end
-	
+
 		local myProfile = ns.DB.GetMyProfile()
 		if myProfile and myProfile.characters then
 			for _, char in pairs(myProfile.characters) do
@@ -99,7 +99,7 @@ function CharacterCache.FindBattleTag(characterName)
 	if CheckStaleness() ~= StaleType.FRESH then
 		Rebuild()
 	end
-	
+
 	-- Try exact match first (handles same-realm or name-only lookups)
 	local result = cache[characterName]
 	if result then
@@ -147,7 +147,7 @@ function CharacterCache.GetStats()
 	for _ in pairs(cache) do
 		characterCount = characterCount + 1
 	end
-	
+
 	return {
 		characterCount = characterCount,
 		isStale = isStale,

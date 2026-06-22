@@ -20,8 +20,9 @@ All your characters are automatically grouped under your player alias (or Battle
 ### Via Addon Manager (Recommended)
 
 Install directly through your favorite addon manager:
+
 - **CurseForge App**: Search for "Endeavoring"
-- **Wago App**: Search for "Endeavoring"  
+- **Wago App**: Search for "Endeavoring"
 - **WoWUp**: Add from CurseForge or Wago
 
 ### Manual Install
@@ -34,6 +35,7 @@ Install directly through your favorite addon manager:
 ## Usage
 
 **Open the main window:**
+
 - Type `/endeavoring` or `/ndvr` or Click the "Endeavoring" button in the Blizzard UI Housing Dashboard (Endeavors tab)
 
 **Set your alias:**

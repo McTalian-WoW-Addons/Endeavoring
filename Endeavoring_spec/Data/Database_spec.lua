@@ -33,7 +33,9 @@ local function SetupDatabase(existingDB)
 	local ns = nsMocks.CreateNS()
 
 	-- PlayerInfo stubs for RegisterCurrentCharacter
-	ns.PlayerInfo.GetBattleTag = function() return "TestPlayer#1234" end
+	ns.PlayerInfo.GetBattleTag = function()
+		return "TestPlayer#1234"
+	end
 	ns.PlayerInfo.GetCharacterInfo = function()
 		return { name = "Thrall", realm = "Stormrage" }
 	end
@@ -45,7 +47,6 @@ end
 -- Tests ------------------------------------------------------------------
 
 describe("Database", function()
-
 	-- ================================================================
 	-- Init
 	-- ================================================================
@@ -136,7 +137,9 @@ describe("Database", function()
 			local ns, DB = SetupDatabase(nil)
 			DB.Init()
 
-			ns.PlayerInfo.GetBattleTag = function() return nil end
+			ns.PlayerInfo.GetBattleTag = function()
+				return nil
+			end
 
 			local success = DB.RegisterCurrentCharacter()
 			assert.is_false(success)
@@ -180,7 +183,9 @@ describe("Database", function()
 			local ns, DB = SetupDatabase(nil)
 			DB.Init()
 
-			ns.PlayerInfo.GetBattleTag = function() return nil end
+			ns.PlayerInfo.GetBattleTag = function()
+				return nil
+			end
 
 			local success = DB.SetPlayerAlias("Something")
 			assert.is_false(success)
@@ -889,8 +894,14 @@ describe("Database", function()
 			local _, DB = SetupDatabase(nil)
 			DB.Init()
 
-			DB.SetActivityLogCache("GUID-A", { isLoaded = true, neighborhoodGUID = "GUID-A", nextUpdateTime = 0, taskActivity = {} })
-			DB.SetActivityLogCache("GUID-B", { isLoaded = true, neighborhoodGUID = "GUID-B", nextUpdateTime = 0, taskActivity = {} })
+			DB.SetActivityLogCache(
+				"GUID-A",
+				{ isLoaded = true, neighborhoodGUID = "GUID-A", nextUpdateTime = 0, taskActivity = {} }
+			)
+			DB.SetActivityLogCache(
+				"GUID-B",
+				{ isLoaded = true, neighborhoodGUID = "GUID-B", nextUpdateTime = 0, taskActivity = {} }
+			)
 
 			DB.ClearActivityLogCache("GUID-A")
 
@@ -902,8 +913,14 @@ describe("Database", function()
 			local _, DB = SetupDatabase(nil)
 			DB.Init()
 
-			DB.SetActivityLogCache("GUID-A", { isLoaded = true, neighborhoodGUID = "GUID-A", nextUpdateTime = 0, taskActivity = {} })
-			DB.SetActivityLogCache("GUID-B", { isLoaded = true, neighborhoodGUID = "GUID-B", nextUpdateTime = 0, taskActivity = {} })
+			DB.SetActivityLogCache(
+				"GUID-A",
+				{ isLoaded = true, neighborhoodGUID = "GUID-A", nextUpdateTime = 0, taskActivity = {} }
+			)
+			DB.SetActivityLogCache(
+				"GUID-B",
+				{ isLoaded = true, neighborhoodGUID = "GUID-B", nextUpdateTime = 0, taskActivity = {} }
+			)
 
 			DB.ClearActivityLogCache(nil)
 

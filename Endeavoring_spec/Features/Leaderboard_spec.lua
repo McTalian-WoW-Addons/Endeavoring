@@ -12,8 +12,12 @@ describe("Leaderboard", function()
 	before_each(function()
 		ns = nsMocks.CreateNS()
 
-		ns.PlayerInfo.GetBattleTag = function() return "Me#1234" end
-		ns.PlayerInfo.IsLocalPlayer = function(name) return name == "MyChar" end
+		ns.PlayerInfo.GetBattleTag = function()
+			return "Me#1234"
+		end
+		ns.PlayerInfo.IsLocalPlayer = function(name)
+			return name == "MyChar"
+		end
 
 		ns.CharacterCache.FindBattleTag = function(name)
 			local map = {
@@ -240,8 +244,8 @@ describe("Leaderboard", function()
 					unsyncedCount = unsyncedCount + 1
 				end
 			end
-			assert.equals(2, syncedCount)  -- MyChar + FriendChar
-			assert.equals(1, unsyncedCount)  -- Stranger
+			assert.equals(2, syncedCount) -- MyChar + FriendChar
+			assert.equals(1, unsyncedCount) -- Stranger
 		end)
 	end)
 

@@ -105,7 +105,10 @@ end
 
 function API.ViewActiveNeighborhood()
 	if C_NeighborhoodInitiative and C_NeighborhoodInitiative.SetViewingNeighborhood then
-		if C_NeighborhoodInitiative.IsViewingActiveNeighborhood and C_NeighborhoodInitiative.IsViewingActiveNeighborhood() then
+		if
+			C_NeighborhoodInitiative.IsViewingActiveNeighborhood
+			and C_NeighborhoodInitiative.IsViewingActiveNeighborhood()
+		then
 			return true
 		end
 
@@ -136,4 +139,3 @@ function API.ViewActiveNeighborhood()
 
 	return false
 end
-

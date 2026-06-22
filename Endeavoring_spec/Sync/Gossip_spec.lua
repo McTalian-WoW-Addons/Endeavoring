@@ -34,7 +34,6 @@ end
 -- Tests ------------------------------------------------------------------
 
 describe("Gossip", function()
-
 	-- ================================================================
 	-- Correction Tracking
 	-- ================================================================
@@ -83,7 +82,9 @@ describe("Gossip", function()
 		it("should return empty when no third-party profiles exist", function()
 			local ns, Gossip = SetupGossip()
 
-			ns.DB.GetAllProfiles = function() return {} end
+			ns.DB.GetAllProfiles = function()
+				return {}
+			end
 
 			local entries = Gossip.BuildDigest("Target#1111")
 			assert.are.equal(0, #entries)
@@ -92,7 +93,9 @@ describe("Gossip", function()
 		it("should skip own profile and target's profile", function()
 			local ns, Gossip = SetupGossip()
 
-			ns.DB.GetMyBattleTag = function() return "Me#1234" end
+			ns.DB.GetMyBattleTag = function()
+				return "Me#1234"
+			end
 			ns.DB.GetAllProfiles = function()
 				return {
 					["Me#1234"] = MakeProfile("Me#1234", "Me", 100, {}, 100),
@@ -100,7 +103,9 @@ describe("Gossip", function()
 					["Third#5555"] = MakeProfile("Third#5555", "Third", 100, {}, 100),
 				}
 			end
-			ns.DB.GetCharacterCount = function() return 0 end
+			ns.DB.GetCharacterCount = function()
+				return 0
+			end
 
 			local entries = Gossip.BuildDigest("Target#1111")
 			-- Should only include Third#5555
@@ -116,8 +121,12 @@ describe("Gossip", function()
 					["ProfileA#1"] = MakeProfile("ProfileA#1", "A", 100, {}, 100),
 				}
 			end
-			ns.DB.GetGossipTracking = function() return {} end
-			ns.DB.GetCharacterCount = function() return 2 end
+			ns.DB.GetGossipTracking = function()
+				return {}
+			end
+			ns.DB.GetCharacterCount = function()
+				return 2
+			end
 
 			local entries = Gossip.BuildDigest("Target#1111")
 			assert.are.equal(1, #entries)
@@ -140,7 +149,9 @@ describe("Gossip", function()
 					["ProfileA#1"] = { au = 100, cu = 100, cc = 0 },
 				}
 			end
-			ns.DB.GetCharacterCount = function() return 0 end
+			ns.DB.GetCharacterCount = function()
+				return 0
+			end
 
 			local entries = Gossip.BuildDigest("Target#1111")
 			assert.are.equal(1, #entries)
@@ -159,7 +170,9 @@ describe("Gossip", function()
 					["ProfileA#1"] = { au = 100, cu = 100, cc = 0 },
 				}
 			end
-			ns.DB.GetCharacterCount = function() return 0 end
+			ns.DB.GetCharacterCount = function()
+				return 0
+			end
 
 			local entries = Gossip.BuildDigest("Target#1111")
 			assert.are.equal(1, #entries)
@@ -179,7 +192,9 @@ describe("Gossip", function()
 				}
 			end
 			-- Different count than tracked
-			ns.DB.GetCharacterCount = function() return 3 end
+			ns.DB.GetCharacterCount = function()
+				return 3
+			end
 
 			local entries = Gossip.BuildDigest("Target#1111")
 			assert.are.equal(1, #entries)
@@ -198,7 +213,9 @@ describe("Gossip", function()
 					["ProfileA#1"] = { au = 100, cu = 200, cc = 3 },
 				}
 			end
-			ns.DB.GetCharacterCount = function() return 3 end
+			ns.DB.GetCharacterCount = function()
+				return 3
+			end
 
 			local entries = Gossip.BuildDigest("Target#1111")
 			assert.are.equal(0, #entries)
@@ -214,15 +231,19 @@ describe("Gossip", function()
 					["New#3"] = MakeProfile("New#3", "New", 300, {}, 200),
 				}
 			end
-			ns.DB.GetGossipTracking = function() return {} end
-			ns.DB.GetCharacterCount = function() return 0 end
+			ns.DB.GetGossipTracking = function()
+				return {}
+			end
+			ns.DB.GetCharacterCount = function()
+				return 0
+			end
 
 			local entries = Gossip.BuildDigest("Target#1111")
 			assert.are.equal(3, #entries)
 			-- Sorted by max(au, cu) descending
-			assert.are.equal("New#3", entries[1][ns.SK.battleTag])  -- max(300,200) = 300
-			assert.are.equal("Mid#2", entries[2][ns.SK.battleTag])  -- max(100,100) = 100
-			assert.are.equal("Old#1", entries[3][ns.SK.battleTag])  -- max(10,50) = 50
+			assert.are.equal("New#3", entries[1][ns.SK.battleTag]) -- max(300,200) = 300
+			assert.are.equal("Mid#2", entries[2][ns.SK.battleTag]) -- max(100,100) = 100
+			assert.are.equal("Old#1", entries[3][ns.SK.battleTag]) -- max(10,50) = 50
 		end)
 
 		it("should dynamically trim entries when encoded message exceeds size limit", function()
@@ -235,9 +256,15 @@ describe("Gossip", function()
 				profiles[btag] = MakeProfile(btag, "P" .. i, i * 100, {}, i * 100)
 			end
 
-			ns.DB.GetAllProfiles = function() return profiles end
-			ns.DB.GetGossipTracking = function() return {} end
-			ns.DB.GetCharacterCount = function() return 1 end
+			ns.DB.GetAllProfiles = function()
+				return profiles
+			end
+			ns.DB.GetGossipTracking = function()
+				return {}
+			end
+			ns.DB.GetCharacterCount = function()
+				return 1
+			end
 
 			-- Simulate encoding that returns too large for 8+ entries
 			local callCount = 0
@@ -266,8 +293,12 @@ describe("Gossip", function()
 					["ProfileA#1"] = MakeProfile("ProfileA#1", "A", 100, {}, 100),
 				}
 			end
-			ns.DB.GetGossipTracking = function() return {} end
-			ns.DB.GetCharacterCount = function() return 0 end
+			ns.DB.GetGossipTracking = function()
+				return {}
+			end
+			ns.DB.GetCharacterCount = function()
+				return 0
+			end
 
 			-- Always over limit
 			ns.AddonMessages.BuildMessage = function()
@@ -287,10 +318,15 @@ describe("Gossip", function()
 		it("should not send when digest is empty", function()
 			local ns, Gossip = SetupGossip()
 
-			ns.DB.GetAllProfiles = function() return {} end
+			ns.DB.GetAllProfiles = function()
+				return {}
+			end
 
 			local sent = false
-			ns.AddonMessages.SendMessage = function() sent = true; return true end
+			ns.AddonMessages.SendMessage = function()
+				sent = true
+				return true
+			end
 
 			Gossip.SendDigest("Target#1111", "TargetChar")
 			assert.is_false(sent)
@@ -304,8 +340,12 @@ describe("Gossip", function()
 					["ProfileA#1"] = MakeProfile("ProfileA#1", "A", 100, {}, 200),
 				}
 			end
-			ns.DB.GetGossipTracking = function() return {} end
-			ns.DB.GetCharacterCount = function() return 2 end
+			ns.DB.GetGossipTracking = function()
+				return {}
+			end
+			ns.DB.GetCharacterCount = function()
+				return 2
+			end
 
 			local sentChannel, sentTarget
 			ns.AddonMessages.SendMessage = function(_, channel, target)
@@ -339,8 +379,12 @@ describe("Gossip", function()
 					["ProfileA#1"] = MakeProfile("ProfileA#1", "A", 100, {}, 200),
 				}
 			end
-			ns.DB.GetGossipTracking = function() return {} end
-			ns.DB.GetCharacterCount = function() return 0 end
+			ns.DB.GetGossipTracking = function()
+				return {}
+			end
+			ns.DB.GetCharacterCount = function()
+				return 0
+			end
 
 			-- BuildMessage succeeds during BuildDigest (size check) but fails during SendDigest
 			local buildCallCount = 0
@@ -353,7 +397,10 @@ describe("Gossip", function()
 			end
 
 			local sent = false
-			ns.AddonMessages.SendMessage = function() sent = true; return true end
+			ns.AddonMessages.SendMessage = function()
+				sent = true
+				return true
+			end
 
 			Gossip.SendDigest("Target#1111", "TargetChar")
 			assert.is_false(sent)
@@ -470,11 +517,16 @@ describe("Gossip", function()
 		it("should handle unknown profile gracefully", function()
 			local ns, Gossip = SetupGossip()
 
-			ns.DB.GetProfile = function() return nil end
+			ns.DB.GetProfile = function()
+				return nil
+			end
 
 			-- Should not error
 			local messagesSent = false
-			ns.AddonMessages.SendMessage = function() messagesSent = true; return true end
+			ns.AddonMessages.SendMessage = function()
+				messagesSent = true
+				return true
+			end
 
 			Gossip.SendProfile("TargetChar", "Ghost#0000", 0)
 			assert.is_false(messagesSent)
@@ -549,7 +601,9 @@ describe("Gossip", function()
 		it("should not send when no newer characters exist", function()
 			local ns, Gossip = SetupGossip()
 
-			ns.DB.GetProfileCharactersAddedAfter = function() return {} end
+			ns.DB.GetProfileCharactersAddedAfter = function()
+				return {}
+			end
 
 			local charsUpdateCalled = false
 			ns.Coordinator.SendCharsUpdate = function()

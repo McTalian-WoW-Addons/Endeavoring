@@ -34,14 +34,14 @@ local DEFAULT_DB = {
 	global = {
 		myProfile = nil,
 		profiles = {},
-		activityLogCache = {},  -- Keyed by neighborhoodGUID
-		gossipTracking = {},  -- Content-aware gossip tracking: [targetBTag][profileBTag] = {au, cu, cc}
-		claimedChests = {},  -- Keyed by "initiativeID:cycleID", true when player has claimed that cycle's chest
+		activityLogCache = {}, -- Keyed by neighborhoodGUID
+		gossipTracking = {}, -- Content-aware gossip tracking: [targetBTag][profileBTag] = {au, cu, cc}
+		claimedChests = {}, -- Keyed by "initiativeID:cycleID", true when player has claimed that cycle's chest
 		verboseDebug = false,
-		settings = nil,  -- User preferences
-		lastSelectedTab = nil,  -- Remember last tab (1=Tasks, 2=Leaderboard, 3=Activity)
-		version = 1
-	}
+		settings = nil, -- User preferences
+		lastSelectedTab = nil, -- Remember last tab (1=Tasks, 2=Leaderboard, 3=Activity)
+		version = 1,
+	},
 }
 
 --- Initialize the database
@@ -49,29 +49,29 @@ function DB.Init()
 	if not EndeavoringDB then
 		EndeavoringDB = CopyTable(DEFAULT_DB)
 	end
-	
+
 	-- Ensure global structure exists
 	if not EndeavoringDB.global then
 		EndeavoringDB.global = {}
 	end
-	
+
 	-- Migration logic can go here in the future
 	if not EndeavoringDB.global.version then
 		EndeavoringDB.global.version = 1
 	end
-	
+
 	if not EndeavoringDB.global.profiles then
 		EndeavoringDB.global.profiles = {}
 	end
-	
+
 	if EndeavoringDB.global.verboseDebug == nil then
 		EndeavoringDB.global.verboseDebug = false
 	end
-	
+
 	if not EndeavoringDB.global.activityLogCache then
 		EndeavoringDB.global.activityLogCache = {}
 	end
-	
+
 	if not EndeavoringDB.global.gossipTracking then
 		EndeavoringDB.global.gossipTracking = {}
 	end
@@ -95,7 +95,9 @@ end
 --- @param initiativeID number The initiative ID
 --- @param cycleID number The current cycle ID
 function DB.SetChestClaimed(initiativeID, cycleID)
-	if not initiativeID or not cycleID then return end
+	if not initiativeID or not cycleID then
+		return
+	end
 	EndeavoringDB.global.claimedChests[makeChestKey(initiativeID, cycleID)] = true
 end
 
@@ -104,7 +106,9 @@ end
 --- @param cycleID number The current cycle ID
 --- @return boolean isClaimed true if the chest has been marked as claimed
 function DB.IsChestClaimed(initiativeID, cycleID)
-	if not initiativeID or not cycleID then return false end
+	if not initiativeID or not cycleID then
+		return false
+	end
 	return EndeavoringDB.global.claimedChests[makeChestKey(initiativeID, cycleID)] == true
 end
 
@@ -116,10 +120,10 @@ function DB.RegisterCurrentCharacter()
 		print(ERROR .. " Unable to register character: BattleTag not found. Make sure you're logged in to Battle.net.")
 		return false
 	end
-	
+
 	local characterInfo = ns.PlayerInfo.GetCharacterInfo()
 	local timestamp = time()
-	
+
 	-- Initialize myProfile if it doesn't exist
 	if not EndeavoringDB.global.myProfile then
 		EndeavoringDB.global.myProfile = {
@@ -127,15 +131,15 @@ function DB.RegisterCurrentCharacter()
 			alias = battleTag, -- Default to BattleTag
 			aliasUpdatedAt = timestamp,
 			characters = {},
-			charsUpdatedAt = timestamp
+			charsUpdatedAt = timestamp,
 		}
 	end
-	
+
 	local myProfile = EndeavoringDB.global.myProfile
-	
+
 	-- Check if character already exists
 	local isNewCharacter = not myProfile.characters[characterInfo.name]
-	
+
 	-- Register character with addedAt timestamp
 	if isNewCharacter then
 		myProfile.characters[characterInfo.name] = {
@@ -147,7 +151,7 @@ function DB.RegisterCurrentCharacter()
 		myProfile.charsUpdatedAt = timestamp
 		print(INFO .. " New Character registered: " .. characterInfo.name .. " (" .. characterInfo.realm .. ")")
 	end
-	
+
 	return true
 end
 
@@ -160,15 +164,15 @@ function DB.SetPlayerAlias(alias)
 		print(ERROR .. " Unable to set alias: BattleTag not found. Make sure you're logged in to Battle.net.")
 		return false
 	end
-	
+
 	if not EndeavoringDB.global.myProfile then
 		-- Initialize profile if it doesn't exist
 		DB.RegisterCurrentCharacter()
 	end
-	
+
 	local myProfile = EndeavoringDB.global.myProfile
 	local timestamp = time()
-	
+
 	myProfile.alias = alias
 	myProfile.aliasUpdatedAt = timestamp
 
@@ -183,18 +187,18 @@ function DB.GetAlias(battleTag)
 		print(ERROR .. " Unable to get alias: BattleTag not provided.")
 		return nil
 	end
-	
+
 	-- Check if it's the player's own BattleTag
 	if EndeavoringDB.global.myProfile and EndeavoringDB.global.myProfile.battleTag == battleTag then
 		return EndeavoringDB.global.myProfile.alias
 	end
-	
+
 	-- Check synced profiles
 	local profile = EndeavoringDB.global.profiles[battleTag]
 	if profile then
 		return profile.alias
 	end
-	
+
 	return nil
 end
 
@@ -215,18 +219,18 @@ function DB.GetCharacters(battleTag)
 		print(ERROR .. " Unable to get characters: BattleTag not provided.")
 		return nil
 	end
-	
+
 	-- Check if it's the player's own BattleTag
 	if EndeavoringDB.global.myProfile and EndeavoringDB.global.myProfile.battleTag == battleTag then
 		return EndeavoringDB.global.myProfile.characters
 	end
-	
+
 	-- Check synced profiles
 	local profile = EndeavoringDB.global.profiles[battleTag]
 	if profile then
 		return profile.characters
 	end
-	
+
 	return nil
 end
 
@@ -258,7 +262,7 @@ function DB.GetCharacterCount(profile)
 	if not profile or not profile.characters then
 		return 0
 	end
-	
+
 	local count = 0
 	for _ in pairs(profile.characters) do
 		count = count + 1
@@ -283,7 +287,7 @@ function DB.GetProfile(battleTag)
 	if battleTag == DB.GetMyBattleTag() then
 		return EndeavoringDB.global.myProfile
 	end
-	
+
 	return EndeavoringDB.global.profiles[battleTag]
 end
 
@@ -302,20 +306,23 @@ function DB.UpdateProfile(battleTag, profileData)
 	if not battleTag or not profileData then
 		return false
 	end
-	
+
 	-- NEVER update myProfile via sync - it's always authoritative
 	if EndeavoringDB.global.myProfile and EndeavoringDB.global.myProfile.battleTag == battleTag then
 		return false
 	end
-	
+
 	-- If we don't have this profile, or if the incoming data is newer, update it
 	local existingProfile = EndeavoringDB.global.profiles[battleTag]
-	
-	if not existingProfile or (profileData.charsUpdatedAt and profileData.charsUpdatedAt > (existingProfile.charsUpdatedAt or 0)) then
+
+	if
+		not existingProfile
+		or (profileData.charsUpdatedAt and profileData.charsUpdatedAt > (existingProfile.charsUpdatedAt or 0))
+	then
 		EndeavoringDB.global.profiles[battleTag] = profileData
 		return true
 	end
-	
+
 	return false
 end
 
@@ -327,17 +334,17 @@ function DB.IsDataNewer(battleTag, incomingTimestamp)
 	if not battleTag or not incomingTimestamp then
 		return false
 	end
-	
+
 	-- Don't check myProfile - it's never synced
 	if EndeavoringDB.global.myProfile and EndeavoringDB.global.myProfile.battleTag == battleTag then
 		return false
 	end
-	
+
 	local existingProfile = EndeavoringDB.global.profiles[battleTag]
 	if not existingProfile then
 		return true -- No existing data, so incoming is "newer"
 	end
-	
+
 	return incomingTimestamp > (existingProfile.charsUpdatedAt or 0)
 end
 
@@ -347,7 +354,7 @@ function DB.GetManifest()
 	if not EndeavoringDB.global.myProfile then
 		return nil
 	end
-	
+
 	local myProfile = EndeavoringDB.global.myProfile
 	return {
 		battleTag = myProfile.battleTag,
@@ -364,10 +371,10 @@ function DB.GetCharactersAddedAfter(afterTimestamp)
 	if not EndeavoringDB.global.myProfile then
 		return {}
 	end
-	
+
 	local result = {}
 	local myProfile = EndeavoringDB.global.myProfile
-	
+
 	for _, character in pairs(myProfile.characters) do
 		if character.addedAt and character.addedAt > afterTimestamp then
 			table.insert(result, {
@@ -377,7 +384,7 @@ function DB.GetCharactersAddedAfter(afterTimestamp)
 			})
 		end
 	end
-	
+
 	return result
 end
 
@@ -390,7 +397,7 @@ function DB.GetProfileCharactersAddedAfter(battleTag, afterTimestamp)
 	if not profile or not profile.characters then
 		return {}
 	end
-	
+
 	local result = {}
 	for _, character in pairs(profile.characters) do
 		if character.addedAt and character.addedAt > afterTimestamp then
@@ -401,7 +408,7 @@ function DB.GetProfileCharactersAddedAfter(battleTag, afterTimestamp)
 			})
 		end
 	end
-	
+
 	return result
 end
 
@@ -413,12 +420,12 @@ function DB.AddCharactersToProfile(battleTag, characters)
 	if not battleTag or not characters then
 		return false
 	end
-	
+
 	-- NEVER update myProfile via sync
 	if EndeavoringDB.global.myProfile and EndeavoringDB.global.myProfile.battleTag == battleTag then
 		return false
 	end
-	
+
 	-- Initialize profile if it doesn't exist
 	if not EndeavoringDB.global.profiles[battleTag] then
 		EndeavoringDB.global.profiles[battleTag] = {
@@ -429,10 +436,10 @@ function DB.AddCharactersToProfile(battleTag, characters)
 			charsUpdatedAt = 0,
 		}
 	end
-	
+
 	local profile = EndeavoringDB.global.profiles[battleTag]
 	local maxTimestamp = profile.charsUpdatedAt or 0
-	
+
 	for _, character in ipairs(characters) do
 		if character.name then
 			-- Only update if this is newer data
@@ -449,12 +456,12 @@ function DB.AddCharactersToProfile(battleTag, characters)
 			end
 		end
 	end
-	
+
 	-- Update profile's characters timestamp if we added newer characters
 	if maxTimestamp > profile.charsUpdatedAt then
 		profile.charsUpdatedAt = maxTimestamp
 	end
-	
+
 	return true
 end
 
@@ -467,12 +474,12 @@ function DB.UpdateProfileAlias(battleTag, alias, aliasUpdatedAt)
 	if not battleTag or not alias or not aliasUpdatedAt then
 		return false
 	end
-	
+
 	-- NEVER update myProfile via sync
 	if EndeavoringDB.global.myProfile and EndeavoringDB.global.myProfile.battleTag == battleTag then
 		return false
 	end
-	
+
 	-- Initialize profile if it doesn't exist
 	if not EndeavoringDB.global.profiles[battleTag] then
 		EndeavoringDB.global.profiles[battleTag] = {
@@ -484,18 +491,18 @@ function DB.UpdateProfileAlias(battleTag, alias, aliasUpdatedAt)
 		}
 		return true
 	end
-	
+
 	local profile = EndeavoringDB.global.profiles[battleTag]
-	
+
 	-- Only update if this is newer
 	if aliasUpdatedAt > (profile.aliasUpdatedAt or 0) then
 		profile.alias = alias
 		profile.aliasUpdatedAt = aliasUpdatedAt
 		-- Don't update charsUpdatedAt - that's only for character changes
-		
+
 		return true
 	end
-	
+
 	return false
 end
 
@@ -506,9 +513,9 @@ function DB.PurgeSyncedProfiles()
 	for _ in pairs(EndeavoringDB.global.profiles) do
 		count = count + 1
 	end
-	
+
 	EndeavoringDB.global.profiles = {}
-	
+
 	return count
 end
 
@@ -524,7 +531,7 @@ function DB.SetVerboseDebug(enabled)
 	if not EndeavoringDB or not EndeavoringDB.global then
 		return
 	end
-	
+
 	EndeavoringDB.global.verboseDebug = enabled
 end
 
@@ -540,18 +547,18 @@ function DB.GetActivityLogCache(neighborhoodGUID)
 	if not EndeavoringDB or not EndeavoringDB.global or not EndeavoringDB.global.activityLogCache then
 		return nil, false
 	end
-	
+
 	local cache = EndeavoringDB.global.activityLogCache[neighborhoodGUID]
 	if not cache then
 		return nil, false
 	end
-	
+
 	-- Check if cache is stale based on nextUpdateTime
 	local now = time()
 	if cache.nextUpdateTime and now >= cache.nextUpdateTime then
-		return cache, true  -- Cache is stale
+		return cache, true -- Cache is stale
 	end
-	
+
 	return cache, false
 end
 
@@ -562,18 +569,18 @@ function DB.SetActivityLogCache(neighborhoodGUID, activityLogInfo)
 	if not EndeavoringDB or not EndeavoringDB.global then
 		return
 	end
-	
+
 	if not EndeavoringDB.global.activityLogCache then
 		EndeavoringDB.global.activityLogCache = {}
 	end
-	
+
 	-- Store a deep copy to avoid reference issues
 	EndeavoringDB.global.activityLogCache[neighborhoodGUID] = {
 		isLoaded = activityLogInfo.isLoaded,
 		neighborhoodGUID = activityLogInfo.neighborhoodGUID,
 		nextUpdateTime = activityLogInfo.nextUpdateTime,
 		taskActivity = CopyTable(activityLogInfo.taskActivity),
-		cachedAt = time()
+		cachedAt = time(),
 	}
 end
 
@@ -583,7 +590,7 @@ function DB.ClearActivityLogCache(neighborhoodGUID)
 	if not EndeavoringDB or not EndeavoringDB.global or not EndeavoringDB.global.activityLogCache then
 		return
 	end
-	
+
 	if neighborhoodGUID then
 		EndeavoringDB.global.activityLogCache[neighborhoodGUID] = nil
 	else
@@ -662,7 +669,7 @@ function DB.GetSettings()
 	if not EndeavoringDB or not EndeavoringDB.global then
 		return nil
 	end
-	
+
 	return EndeavoringDB.global.settings
 end
 
@@ -672,7 +679,7 @@ function DB.SetSettings(settings)
 	if not EndeavoringDB or not EndeavoringDB.global then
 		return
 	end
-	
+
 	EndeavoringDB.global.settings = settings
 end
 
@@ -682,7 +689,7 @@ function DB.GetLastSelectedTab()
 	if not EndeavoringDB or not EndeavoringDB.global then
 		return nil
 	end
-	
+
 	return EndeavoringDB.global.lastSelectedTab
 end
 
@@ -692,7 +699,6 @@ function DB.SetLastSelectedTab(tabID)
 	if not EndeavoringDB or not EndeavoringDB.global then
 		return
 	end
-	
+
 	EndeavoringDB.global.lastSelectedTab = tabID
 end
-

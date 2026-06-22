@@ -11,15 +11,15 @@ local DebugPrint = ns.DebugPrint
 
 -- Time range constants (in seconds)
 local TIME_RANGE = {
-	CURRENT_ENDEAVOR = 0,  -- Entire duration of active endeavor
-	TODAY = 86400,         -- 24 hours
-	THIS_WEEK = 604800,    -- 7 days
+	CURRENT_ENDEAVOR = 0, -- Entire duration of active endeavor
+	TODAY = 86400, -- 24 hours
+	THIS_WEEK = 604800, -- 7 days
 }
 
 -- Current filter state
 local state = {
 	timeRange = TIME_RANGE.CURRENT_ENDEAVOR,
-	sortKey = ns.Constants.LEADERBOARD_SORT_RANK,  -- Default sort by rank ascending
+	sortKey = ns.Constants.LEADERBOARD_SORT_RANK, -- Default sort by rank ascending
 	sortAsc = true,
 }
 
@@ -52,7 +52,7 @@ function Leaderboard.BuildFromActivityLog(activityLog, timeRange)
 					entries = 0,
 				}
 			end
-			
+
 			playerSum[entry.playerName].total = playerSum[entry.playerName].total + entry.amount
 			playerSum[entry.playerName].entries = playerSum[entry.playerName].entries + 1
 		end
@@ -96,14 +96,15 @@ function Leaderboard.BuildEnriched(activityLog, timeRange)
 		if battleTag then
 			local profile = ns.DB.GetProfile(battleTag)
 			local displayName = profile and profile.alias or battleTag
-			battleTagLeaderboard[battleTag] = battleTagLeaderboard[battleTag] or {
-				displayName = displayName,
-				total = 0,
-				entries = 0,
-				charNames = {},
-				isLocalPlayer = (battleTag == myBattleTag),
-				hasSyncedProfile = true,
-			}
+			battleTagLeaderboard[battleTag] = battleTagLeaderboard[battleTag]
+				or {
+					displayName = displayName,
+					total = 0,
+					entries = 0,
+					charNames = {},
+					isLocalPlayer = (battleTag == myBattleTag),
+					hasSyncedProfile = true,
+				}
 			battleTagLeaderboard[battleTag].total = battleTagLeaderboard[battleTag].total + entry.total
 			battleTagLeaderboard[battleTag].entries = battleTagLeaderboard[battleTag].entries + entry.entries
 			table.insert(battleTagLeaderboard[battleTag].charNames, entry.player)
@@ -249,9 +250,9 @@ local function SetSort(sortKey)
 		state.sortKey = sortKey
 		-- Default sort direction per column
 		if sortKey == constants.LEADERBOARD_SORT_RANK then
-			state.sortAsc = true  -- Rank 1 first
+			state.sortAsc = true -- Rank 1 first
 		elseif sortKey == constants.LEADERBOARD_SORT_NAME then
-			state.sortAsc = true  -- A-Z
+			state.sortAsc = true -- A-Z
 		elseif sortKey == constants.LEADERBOARD_SORT_TOTAL then
 			state.sortAsc = false -- Highest first
 		elseif sortKey == constants.LEADERBOARD_SORT_ENTRIES then
@@ -299,7 +300,7 @@ local function CreateLeaderboardRow(parent, index)
 	row:SetHeight(constants.LEADERBOARD_ROW_HEIGHT)
 	row:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -((index - 1) * constants.LEADERBOARD_ROW_HEIGHT))
 	row:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 0, -((index - 1) * constants.LEADERBOARD_ROW_HEIGHT))
-	
+
 	-- Enable mouse events for tooltips
 	row:EnableMouse(true)
 
@@ -333,26 +334,26 @@ local function CreateLeaderboardRow(parent, index)
 	row.entries:SetWidth(constants.LEADERBOARD_ENTRIES_WIDTH)
 	row.entries:SetJustifyH("RIGHT")
 	row.entries:SetPoint("LEFT", row.total, "RIGHT", 0, 0)
-	
+
 	-- Tooltip handlers
 	row:SetScript("OnEnter", function(self)
 		if not self.data or not self.data.charNames or #self.data.charNames == 0 then
 			return
 		end
-		
+
 		GameTooltip:SetOwner(self, "ANCHOR_CURSOR_RIGHT", 4, 0)
 		GameTooltip:SetText(self.data.displayName, 1, 1, 1, 1, true)
-		GameTooltip:AddLine(L["<Endeavoring User>"], 86/255, 130/255, 3/255)
+		GameTooltip:AddLine(L["<Endeavoring User>"], 86 / 255, 130 / 255, 3 / 255)
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine(L["Contributing Characters:"], 0.5, 0.5, 0.5)
-		
+
 		for _, charName in ipairs(self.data.charNames) do
 			GameTooltip:AddLine(charName, 1, 0.82, 0)
 		end
-		
+
 		GameTooltip:Show()
 	end)
-	
+
 	row:SetScript("OnLeave", function(self)
 		GameTooltip:Hide()
 	end)
@@ -450,7 +451,7 @@ local function UpdateLeaderboardDisplay()
 		row.name:SetText(entry.displayName or "Unknown")
 		row.total:SetText(string.format("%.3f", entry.total or 0))
 		row.entries:SetText(tostring(entry.entries or 0))
-		
+
 		-- Show addon icon for synced profiles
 		if entry.hasSyncedProfile then
 			row.addonIcon:Show()
@@ -503,7 +504,7 @@ function Leaderboard.CreateTab(parent)
 	filterContainer:SetHeight(constants.LEADERBOARD_FILTER_HEIGHT)
 
 	local filterButtons = {}
-	local filterOrder = {TIME_RANGE.CURRENT_ENDEAVOR, TIME_RANGE.THIS_WEEK, TIME_RANGE.TODAY}
+	local filterOrder = { TIME_RANGE.CURRENT_ENDEAVOR, TIME_RANGE.THIS_WEEK, TIME_RANGE.TODAY }
 	for i, range in ipairs(filterOrder) do
 		local button = CreateFrame("Button", nil, filterContainer, "UIPanelButtonTemplate")
 		button:SetSize(constants.LEADERBOARD_FILTER_BUTTON_WIDTH, constants.LEADERBOARD_FILTER_BUTTON_HEIGHT)
@@ -515,7 +516,7 @@ function Leaderboard.CreateTab(parent)
 		if i == 1 then
 			button:SetPoint("LEFT", 4, 0)
 		else
-			button:SetPoint("LEFT", filterButtons[filterOrder[i-1]], "RIGHT", 4, 0)
+			button:SetPoint("LEFT", filterButtons[filterOrder[i - 1]], "RIGHT", 4, 0)
 		end
 
 		filterButtons[range] = button
@@ -551,7 +552,7 @@ function Leaderboard.CreateTab(parent)
 
 	-- Account for scrollbar width from UIPanelScrollFrameTemplate
 	local scrollbarOffset = constants.SCROLLBAR_WIDTH
-	
+
 	local totalHeader = CreateFrame("Button", nil, header)
 	totalHeader:SetPoint("LEFT", nameHeader, "RIGHT", 0, 0)
 	totalHeader:SetSize(constants.LEADERBOARD_TOTAL_WIDTH, constants.LEADERBOARD_HEADER_HEIGHT)
@@ -618,7 +619,7 @@ function Leaderboard.CreateTab(parent)
 
 	ns.ui.leaderboardUI = content
 	UpdateFilterButtons()
-	UpdateSortHeader()  -- Initialize sort indicators
+	UpdateSortHeader() -- Initialize sort indicators
 
 	-- Refresh display whenever this tab becomes visible (handles initial show and tab switches)
 	content:SetScript("OnShow", function()

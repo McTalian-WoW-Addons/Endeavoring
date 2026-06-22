@@ -11,9 +11,12 @@ _G.unpack = _G.unpack or table.unpack
 _G.format = _G.format or string.format
 
 -- WoW exposes `strtrim` as a global.
-_G.strtrim = _G.strtrim or function(str, chars)
-	if not str then return str end
-	chars = chars or " \t\r\n"
-	local pattern_chars = chars:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
-	return str:gsub("^[" .. pattern_chars .. "]*", ""):gsub("[" .. pattern_chars .. "]*$", "")
-end
+_G.strtrim = _G.strtrim
+	or function(str, chars)
+		if not str then
+			return str
+		end
+		chars = chars or " \t\r\n"
+		local pattern_chars = chars:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1")
+		return str:gsub("^[" .. pattern_chars .. "]*", ""):gsub("[" .. pattern_chars .. "]*$", "")
+	end

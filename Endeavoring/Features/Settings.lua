@@ -22,7 +22,7 @@ local SETTINGS_VARIABLE_PREFIX = "ENDEAVORING_"
 local TAB_OPTIONS = {
 	{ value = 1, label = L["Tasks"] },
 	{ value = 2, label = L["Leaderboard"] },
-	{ value = 3, label = L["Activity"] }
+	{ value = 3, label = L["Activity"] },
 }
 
 --- Initialize settings with defaults if needed
@@ -30,9 +30,9 @@ local function InitializeDefaults()
 	local defaults = DB.GetSettings()
 	if not defaults then
 		DB.SetSettings({
-			defaultTab = 1,  -- Tasks
+			defaultTab = 1, -- Tasks
 			rememberLastTab = true,
-			debugMode = false
+			debugMode = false,
 		})
 	end
 end
@@ -47,7 +47,7 @@ end
 --- @return number Tab ID (1=Tasks, 2=Leaderboard, 3=Activity)
 function Settings.GetStartupTab()
 	local settings = Settings.Get()
-	
+
 	-- If remember last tab is enabled, check for saved tab
 	if settings.rememberLastTab then
 		local lastTab = DB.GetLastSelectedTab()
@@ -55,7 +55,7 @@ function Settings.GetStartupTab()
 			return lastTab
 		end
 	end
-	
+
 	-- Fall back to default tab
 	return settings.defaultTab or 1
 end
@@ -74,56 +74,63 @@ function Settings.Register()
 	-- Wait for addon to fully load
 	EventUtil.ContinueOnAddOnLoaded(addonName, function()
 		InitializeDefaults()
-		
+
 		-- Create main settings category
 		local category, layout = WoWSettings.RegisterVerticalLayoutCategory("Endeavoring")
-		
+
 		-- Add section header
 		layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(L["General"]))
-		
+
 		-- Remember Last Tab checkbox (first, as it affects the Default Tab behavior)
 		do
 			local variable = SETTINGS_VARIABLE_PREFIX .. "REMEMBER_LAST_TAB"
 			local name = L["Remember Last Tab"]
 			local tooltip = L["TIP_RememberLastTab"]
-			
+
 			local function GetValue()
 				return Settings.Get().rememberLastTab
 			end
-			
+
 			local function SetValue(value)
 				local settings = Settings.Get()
 				settings.rememberLastTab = value
 				DB.SetSettings(settings)
-				
+
 				-- If disabling, clear the saved tab
 				if not value then
 					DB.SetLastSelectedTab(nil)
 				end
 			end
-			
+
 			local defaultValue = true
-			local setting = WoWSettings.RegisterProxySetting(category, variable,
-				WoWSettings.VarType.Boolean, name, defaultValue, GetValue, SetValue)
+			local setting = WoWSettings.RegisterProxySetting(
+				category,
+				variable,
+				WoWSettings.VarType.Boolean,
+				name,
+				defaultValue,
+				GetValue,
+				SetValue
+			)
 			WoWSettings.CreateCheckbox(category, setting, tooltip)
 		end
-		
+
 		-- Default Tab dropdown (only used when Remember Last Tab is disabled)
 		do
 			local variable = SETTINGS_VARIABLE_PREFIX .. "DEFAULT_TAB"
 			local name = L["Default Tab"]
 			local tooltip = L["TIP_DefaultTab"]
-			
+
 			local function GetValue()
 				return Settings.Get().defaultTab or 1
 			end
-			
+
 			local function SetValue(value)
 				local settings = Settings.Get()
 				settings.defaultTab = value
 				DB.SetSettings(settings)
 			end
-			
+
 			local function GetOptions()
 				local container = WoWSettings.CreateControlTextContainer()
 				for _, option in ipairs(TAB_OPTIONS) do
@@ -131,85 +138,99 @@ function Settings.Register()
 				end
 				return container:GetData()
 			end
-			
+
 			local defaultValue = 1
-			local setting = WoWSettings.RegisterProxySetting(category, variable,
-				WoWSettings.VarType.Number, name, defaultValue, GetValue, SetValue)
+			local setting = WoWSettings.RegisterProxySetting(
+				category,
+				variable,
+				WoWSettings.VarType.Number,
+				name,
+				defaultValue,
+				GetValue,
+				SetValue
+			)
 			WoWSettings.CreateDropdown(category, setting, GetOptions, tooltip)
 		end
-		
+
 		-- Player Alias section
 		layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(L["Player Alias"]))
-		
+
 		-- Show Current Alias button
 		do
 			local name = L["Change Player Alias"]
 			local tooltip = L["TIP_ChangeAlias"]
-			
+
 			local function OnButtonClick()
 				local currentAlias = DB.GetPlayerAlias() or ""
 				local displayAlias = currentAlias ~= "" and currentAlias or "None"
 				-- Pass displayAlias as text_arg1 for the %s placeholder, and currentAlias as data
 				StaticPopup_Show("ENDEAVORING_SET_ALIAS", displayAlias, nil, currentAlias)
 			end
-			
+
 			local addSearchTags = true
 			local initializer = CreateSettingsButtonInitializer("", name, OnButtonClick, tooltip, addSearchTags)
 			layout:AddInitializer(initializer)
 		end
-		
+
 		-- Debug section
 		layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(L["Debug"]))
-		
--- Enable Debug Logs checkbox
-	do
-		local variable = SETTINGS_VARIABLE_PREFIX .. "DEBUG_MODE"
-		local name = L["Enable Debug Logs"]
-		local tooltip = L["TIP_EnableDebugLogs"]
-			
+
+		-- Enable Debug Logs checkbox
+		do
+			local variable = SETTINGS_VARIABLE_PREFIX .. "DEBUG_MODE"
+			local name = L["Enable Debug Logs"]
+			local tooltip = L["TIP_EnableDebugLogs"]
+
 			local function GetValue()
 				return DB.IsVerboseDebug()
 			end
-			
+
 			local function SetValue(value)
 				DB.SetVerboseDebug(value)
 				local settings = Settings.Get()
 				settings.debugMode = value
 				DB.SetSettings(settings)
-				
+
 				if value then
 					print(INFO .. " " .. L["MSG_DebugEnabled"])
 				else
 					print(INFO .. " " .. L["MSG_DebugDisabled"])
 				end
 			end
-			
+
 			local defaultValue = false
-			local setting = WoWSettings.RegisterProxySetting(category, variable,
-				WoWSettings.VarType.Boolean, name, defaultValue, GetValue, SetValue)
+			local setting = WoWSettings.RegisterProxySetting(
+				category,
+				variable,
+				WoWSettings.VarType.Boolean,
+				name,
+				defaultValue,
+				GetValue,
+				SetValue
+			)
 			WoWSettings.CreateCheckbox(category, setting, tooltip)
 		end
-		
+
 		-- About section
 		layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(L["About"]))
-		
+
 		-- Version and Author info
 		do
 			local name = L["View Addon Info"]
 			local tooltip = L["TIP_ViewAddonInfo"]
-			
+
 			local function OnButtonClick()
 				StaticPopup_Show("ENDEAVORING_ABOUT")
 			end
-			
+
 			local addSearchTags = true
 			local initializer = CreateSettingsButtonInitializer("", name, OnButtonClick, tooltip, addSearchTags)
 			layout:AddInitializer(initializer)
 		end
-		
+
 		-- Register the category
 		WoWSettings.RegisterAddOnCategory(category)
-		
+
 		-- Store category ID for easy access
 		ns.settingsCategoryID = category:GetID()
 	end)
@@ -272,15 +293,15 @@ StaticPopupDialogs["ENDEAVORING_SET_ALIAS"] = {
 
 -- Register about/attribution dialog
 StaticPopupDialogs["ENDEAVORING_ABOUT"] = {
-	text = "|cFFFFD700Endeavoring|r\n\n" ..
-	       "|cFFFFFFFFVersion:|r @project-version@\n" ..
-	       "|cFFFFFFFFAuthor:|r McTalian\n\n" ..
-	       "|cFF00FF00Attributions:|r\n" ..
-	       "Addon icon by Delapouite (delapouite.com)\n" ..
-	       "Licensed under CC BY 3.0\n" ..
-	       "Modified and downloaded via game-icons.net\n\n" ..
-	       "|cFF888888GitHub:|r github.com/McTalian-WoW-Addons/Endeavoring\n" ..
-	       "|cFF888888Discord:|r discord.gg/czRYVWhe33",
+	text = "|cFFFFD700Endeavoring|r\n\n"
+		.. "|cFFFFFFFFVersion:|r @project-version@\n"
+		.. "|cFFFFFFFFAuthor:|r McTalian\n\n"
+		.. "|cFF00FF00Attributions:|r\n"
+		.. "Addon icon by Delapouite (delapouite.com)\n"
+		.. "Licensed under CC BY 3.0\n"
+		.. "Modified and downloaded via game-icons.net\n\n"
+		.. "|cFF888888GitHub:|r github.com/McTalian-WoW-Addons/Endeavoring\n"
+		.. "|cFF888888Discord:|r discord.gg/czRYVWhe33",
 	button1 = "Close",
 	timeout = 0,
 	whileDead = true,

@@ -49,15 +49,15 @@ local backgroundRefreshPending = false
 function ActivityLogCache.Get()
 	-- Try to get live data first
 	local liveData = ns.API.GetActivityLogInfo()
-	
+
 	-- Get active neighborhood GUID
 	local neighborhoodGUID = ns.API.GetActiveNeighborhoodGUID()
-	
+
 	if not neighborhoodGUID then
 		-- No active neighborhood, return live data (or nil)
 		return liveData
 	end
-	
+
 	-- Check if live data is loaded
 	if liveData and liveData.isLoaded and #liveData.taskActivity > 0 then
 		-- Live data is loaded, update cache and return it
@@ -66,9 +66,7 @@ function ActivityLogCache.Get()
 
 		-- Check if live data has expired per the server's nextUpdateTime signal.
 		local now = time()
-		local isExpired = liveData.nextUpdateTime
-			and liveData.nextUpdateTime > 0
-			and now >= liveData.nextUpdateTime
+		local isExpired = liveData.nextUpdateTime and liveData.nextUpdateTime > 0 and now >= liveData.nextUpdateTime
 		if not isExpired then
 			-- Data is still fresh; clear any pending background refresh
 			backgroundRefreshPending = false
@@ -83,7 +81,7 @@ function ActivityLogCache.Get()
 
 		return liveData
 	end
-	
+
 	-- Live data not loaded yet, try to return cached data
 	local cachedData, isStale = ns.DB.GetActivityLogCache(neighborhoodGUID)
 	if cachedData then
@@ -94,10 +92,10 @@ function ActivityLogCache.Get()
 				ns.API.RequestInitiativeInfo()
 			end)
 		end
-		
+
 		return cachedData
 	end
-	
+
 	-- No cache available, return live data (even if not loaded)
 	return liveData
 end
@@ -107,7 +105,7 @@ function ActivityLogCache.RefreshVisibleTabs()
 	if not ns.ui.mainFrame or not ns.ui.mainFrame:IsShown() then
 		return
 	end
-	
+
 	local selectedTab = ns.ui.mainFrame:GetTab()
 	if selectedTab == ns.ui.mainFrame.activityTabID and ns.Activity then
 		ns.Activity.Refresh()
@@ -124,17 +122,17 @@ function ActivityLogCache.OnActivityLogUpdated()
 		DebugPrint(L["DBG_ActivityLogNotReady"])
 		return
 	end
-	
+
 	-- Get active neighborhood GUID to update cache
 	local neighborhoodGUID = ns.API.GetActiveNeighborhoodGUID()
-	
+
 	if not neighborhoodGUID then
 		return
 	end
-	
+
 	-- Update cache
 	ns.DB.SetActivityLogCache(neighborhoodGUID, activityLogInfo)
-	
+
 	-- Refresh visible tabs
 	ActivityLogCache.RefreshVisibleTabs()
 end

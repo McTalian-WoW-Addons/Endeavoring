@@ -37,8 +37,7 @@ local function ParseXML(xmlPath)
 
 	for line in io.lines(xmlPath) do
 		-- Match both <Script file="..."/> and <Include file="..."/>
-		local scriptFile = line:match('[Ss]cript%s+file="([^"]+)"')
-			or line:match('[Ii]nclude%s+file="([^"]+)"')
+		local scriptFile = line:match('[Ss]cript%s+file="([^"]+)"') or line:match('[Ii]nclude%s+file="([^"]+)"')
 		if scriptFile then
 			if scriptFile:match("%.lua$") then
 				table.insert(files, xmlDir .. scriptFile)

@@ -31,33 +31,39 @@ _G.C_ChatInfo.RegisterAddonMessagePrefix = _G.C_ChatInfo.RegisterAddonMessagePre
 	return true
 end
 _G.C_ChatInfo.SendAddonMessage = _G.C_ChatInfo.SendAddonMessage or function()
-	return 0  -- Success
+	return 0 -- Success
 end
 _G.C_ChatInfo.InChatMessagingLockdown = _G.C_ChatInfo.InChatMessagingLockdown or function()
 	return false
 end
 
 -- CopyTable: deep-copy a table (WoW utility)
-_G.CopyTable = _G.CopyTable or function(t)
-	if type(t) ~= "table" then return t end
-	local copy = {}
-	for k, v in pairs(t) do
-		if type(v) == "table" then
-			copy[k] = _G.CopyTable(v)
-		else
-			copy[k] = v
+_G.CopyTable = _G.CopyTable
+	or function(t)
+		if type(t) ~= "table" then
+			return t
 		end
+		local copy = {}
+		for k, v in pairs(t) do
+			if type(v) == "table" then
+				copy[k] = _G.CopyTable(v)
+			else
+				copy[k] = v
+			end
+		end
+		return copy
 	end
-	return copy
-end
 
 -- tContains: check if a value exists in a list-like table (WoW utility)
-_G.tContains = _G.tContains or function(tbl, item)
-	for _, v in ipairs(tbl) do
-		if v == item then return true end
+_G.tContains = _G.tContains
+	or function(tbl, item)
+		for _, v in ipairs(tbl) do
+			if v == item then
+				return true
+			end
+		end
+		return false
 	end
-	return false
-end
 
 -- GetLocale: returns the client locale string (e.g. "enUS", "deDE")
 -- In tests, default to US English so non-English locale files skip their translations.

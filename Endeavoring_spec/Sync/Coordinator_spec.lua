@@ -39,12 +39,16 @@ describe("Coordinator", function()
 		ns.DB.GetCharacterCount = function(profile)
 			local count = 0
 			if profile and profile.characters then
-				for _ in pairs(profile.characters) do count = count + 1 end
+				for _ in pairs(profile.characters) do
+					count = count + 1
+				end
 			end
 			return count
 		end
 
-		ns.PlayerInfo.IsInGuild = function() return true end
+		ns.PlayerInfo.IsInGuild = function()
+			return true
+		end
 
 		-- Load Coordinator with our mocked ns
 		nsMocks.LoadAddonFile("Endeavoring/Sync/Coordinator.lua", ns)
@@ -104,7 +108,9 @@ describe("Coordinator", function()
 		end)
 
 		it("returns false if BuildMessage fails", function()
-			ns.AddonMessages.BuildMessage = function() return nil end
+			ns.AddonMessages.BuildMessage = function()
+				return nil
+			end
 			local chars = {
 				{ name = "Char1", realm = "Realm1", addedAt = 100 },
 			}
@@ -113,7 +119,9 @@ describe("Coordinator", function()
 		end)
 
 		it("returns false if SendMessage fails on first chunk", function()
-			ns.AddonMessages.SendMessage = function() return false end
+			ns.AddonMessages.SendMessage = function()
+				return false
+			end
 			local chars = {}
 			for i = 1, 5 do
 				table.insert(chars, { name = "Char" .. i, realm = "Realm1", addedAt = i * 100 })
@@ -126,7 +134,9 @@ describe("Coordinator", function()
 			local callCount = 0
 			ns.AddonMessages.SendMessage = function()
 				callCount = callCount + 1
-				if callCount == 2 then return false end
+				if callCount == 2 then
+					return false
+				end
 				return true
 			end
 			local chars = {}
@@ -151,19 +161,25 @@ describe("Coordinator", function()
 		end)
 
 		it("does not send if no profile exists", function()
-			ns.DB.GetMyProfile = function() return nil end
+			ns.DB.GetMyProfile = function()
+				return nil
+			end
 			ns.Coordinator.SendManifest()
 			assert.equals(0, #ns._sentMessages)
 		end)
 
 		it("does not send if not in a guild", function()
-			ns.PlayerInfo.IsInGuild = function() return false end
+			ns.PlayerInfo.IsInGuild = function()
+				return false
+			end
 			ns.Coordinator.SendManifest()
 			assert.equals(0, #ns._sentMessages)
 		end)
 
 		it("does not send if BuildMessage fails", function()
-			ns.AddonMessages.BuildMessage = function() return nil end
+			ns.AddonMessages.BuildMessage = function()
+				return nil
+			end
 			ns.Coordinator.SendManifest()
 			assert.equals(0, #ns._sentMessages)
 		end)

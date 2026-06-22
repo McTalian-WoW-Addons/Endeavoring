@@ -15,7 +15,9 @@ local function SetupProtocol()
 	local ns = nsMocks.CreateNS()
 
 	-- Make sender different from "our" BattleTag so messages aren't ignored
-	ns.DB.GetMyBattleTag = function() return "TestPlayer#1234" end
+	ns.DB.GetMyBattleTag = function()
+		return "TestPlayer#1234"
+	end
 
 	nsMocks.LoadAddonFile("Endeavoring/Sync/Protocol.lua", ns)
 	return ns, ns.Protocol
@@ -39,9 +41,7 @@ end
 -- Tests ------------------------------------------------------------------
 
 describe("Protocol", function()
-
 	describe("NormalizeKeys", function()
-
 		describe("MANIFEST with verbose keys", function()
 			it("should process a manifest with standard verbose keys", function()
 				local ns, Protocol = SetupProtocol()
@@ -77,7 +77,9 @@ describe("Protocol", function()
 					end
 					return "encoded_message"
 				end
-				ns.AddonMessages.SendMessage = function() return true end
+				ns.AddonMessages.SendMessage = function()
+					return true
+				end
 
 				SimulateMessage(ns, payload)
 
@@ -118,7 +120,9 @@ describe("Protocol", function()
 					end
 					return "encoded_message"
 				end
-				ns.AddonMessages.SendMessage = function() return true end
+				ns.AddonMessages.SendMessage = function()
+					return true
+				end
 
 				SimulateMessage(ns, payload)
 
@@ -335,14 +339,18 @@ describe("Protocol", function()
 				-- Sender is identifiable via CharacterCache
 				local senderBTag = "Sender#9999"
 				ns.CharacterCache.FindBattleTag = function(name)
-					if name == "OtherPlayer" then return senderBTag end
+					if name == "OtherPlayer" then
+						return senderBTag
+					end
 					return nil
 				end
 
 				-- Profile from digest is unknown to us
 				local profileBTag = "Unknown#1111"
 				ns.DB.GetProfile = function(bt)
-					if bt == profileBTag then return nil end
+					if bt == profileBTag then
+						return nil
+					end
 					return nil
 				end
 
@@ -357,7 +365,9 @@ describe("Protocol", function()
 					end
 					return "encoded_message"
 				end
-				ns.AddonMessages.SendMessage = function() return true end
+				ns.AddonMessages.SendMessage = function()
+					return true
+				end
 
 				local payload = {
 					t = "G",
@@ -379,7 +389,9 @@ describe("Protocol", function()
 
 				local senderBTag = "Sender#9999"
 				ns.CharacterCache.FindBattleTag = function(name)
-					if name == "OtherPlayer" then return senderBTag end
+					if name == "OtherPlayer" then
+						return senderBTag
+					end
 					return nil
 				end
 
@@ -396,7 +408,9 @@ describe("Protocol", function()
 					return nil
 				end
 				ns.DB.GetCharacterCount = function(profile)
-					if profile and profile.characters then return #profile.characters end
+					if profile and profile.characters then
+						return #profile.characters
+					end
 					return 0
 				end
 
@@ -410,7 +424,9 @@ describe("Protocol", function()
 					end
 					return "encoded_message"
 				end
-				ns.AddonMessages.SendMessage = function() return true end
+				ns.AddonMessages.SendMessage = function()
+					return true
+				end
 
 				local payload = {
 					t = "G",
@@ -431,7 +447,9 @@ describe("Protocol", function()
 
 				local senderBTag = "Sender#9999"
 				ns.CharacterCache.FindBattleTag = function(name)
-					if name == "OtherPlayer" then return senderBTag end
+					if name == "OtherPlayer" then
+						return senderBTag
+					end
 					return nil
 				end
 
@@ -447,7 +465,9 @@ describe("Protocol", function()
 					end
 					return nil
 				end
-				ns.DB.GetCharacterCount = function() return 0 end
+				ns.DB.GetCharacterCount = function()
+					return 0
+				end
 
 				local requestSent = false
 				local requestedAf
@@ -459,7 +479,9 @@ describe("Protocol", function()
 					end
 					return "encoded_message"
 				end
-				ns.AddonMessages.SendMessage = function() return true end
+				ns.AddonMessages.SendMessage = function()
+					return true
+				end
 
 				local payload = {
 					t = "G",
@@ -480,7 +502,9 @@ describe("Protocol", function()
 
 				local senderBTag = "Sender#9999"
 				ns.CharacterCache.FindBattleTag = function(name)
-					if name == "OtherPlayer" then return senderBTag end
+					if name == "OtherPlayer" then
+						return senderBTag
+					end
 					return nil
 				end
 
@@ -496,7 +520,9 @@ describe("Protocol", function()
 					end
 					return nil
 				end
-				ns.DB.GetCharacterCount = function() return 1 end
+				ns.DB.GetCharacterCount = function()
+					return 1
+				end
 
 				local requestSent = false
 				ns.AddonMessages.BuildMessage = function(msgType, data)
@@ -506,7 +532,9 @@ describe("Protocol", function()
 					end
 					return "encoded_message"
 				end
-				ns.AddonMessages.SendMessage = function() return true end
+				ns.AddonMessages.SendMessage = function()
+					return true
+				end
 
 				-- Same cu (1700000200) but digest has 3 chars vs our 1
 				local payload = {
@@ -527,7 +555,9 @@ describe("Protocol", function()
 
 				local senderBTag = "Sender#9999"
 				ns.CharacterCache.FindBattleTag = function(name)
-					if name == "OtherPlayer" then return senderBTag end
+					if name == "OtherPlayer" then
+						return senderBTag
+					end
 					return nil
 				end
 
@@ -543,7 +573,9 @@ describe("Protocol", function()
 					end
 					return nil
 				end
-				ns.DB.GetCharacterCount = function() return 1 end
+				ns.DB.GetCharacterCount = function()
+					return 1
+				end
 
 				local aliasCorrected = false
 				ns.Gossip.CorrectStaleAlias = function(sender, bt, alias, ts)
@@ -580,7 +612,9 @@ describe("Protocol", function()
 
 				local senderBTag = "Sender#9999"
 				ns.CharacterCache.FindBattleTag = function(name)
-					if name == "OtherPlayer" then return senderBTag end
+					if name == "OtherPlayer" then
+						return senderBTag
+					end
 					return nil
 				end
 
@@ -596,7 +630,9 @@ describe("Protocol", function()
 					end
 					return nil
 				end
-				ns.DB.GetCharacterCount = function() return 2 end
+				ns.DB.GetCharacterCount = function()
+					return 2
+				end
 
 				local charsCorrected = false
 				ns.Gossip.CorrectStaleChars = function(sender, bt, correctTs, senderTs)
@@ -625,7 +661,9 @@ describe("Protocol", function()
 
 				local senderBTag = "Sender#9999"
 				ns.CharacterCache.FindBattleTag = function(name)
-					if name == "OtherPlayer" then return senderBTag end
+					if name == "OtherPlayer" then
+						return senderBTag
+					end
 					return nil
 				end
 
@@ -641,7 +679,9 @@ describe("Protocol", function()
 					end
 					return nil
 				end
-				ns.DB.GetCharacterCount = function() return 5 end
+				ns.DB.GetCharacterCount = function()
+					return 5
+				end
 
 				local charsCorrected = false
 				ns.Gossip.CorrectStaleChars = function(sender, bt, correctTs, senderTs)
@@ -670,7 +710,9 @@ describe("Protocol", function()
 
 				local senderBTag = "Sender#9999"
 				ns.CharacterCache.FindBattleTag = function(name)
-					if name == "OtherPlayer" then return senderBTag end
+					if name == "OtherPlayer" then
+						return senderBTag
+					end
 					return nil
 				end
 
@@ -686,7 +728,9 @@ describe("Protocol", function()
 					end
 					return nil
 				end
-				ns.DB.GetCharacterCount = function() return 3 end
+				ns.DB.GetCharacterCount = function()
+					return 3
+				end
 
 				local messageSent = false
 				ns.AddonMessages.BuildMessage = function(msgType, data)
@@ -695,8 +739,12 @@ describe("Protocol", function()
 					end
 					return "encoded_message"
 				end
-				ns.Gossip.CorrectStaleAlias = function() messageSent = true end
-				ns.Gossip.CorrectStaleChars = function() messageSent = true end
+				ns.Gossip.CorrectStaleAlias = function()
+					messageSent = true
+				end
+				ns.Gossip.CorrectStaleChars = function()
+					messageSent = true
+				end
 
 				local payload = {
 					t = "G",
@@ -716,7 +764,9 @@ describe("Protocol", function()
 
 				local senderBTag = "Sender#9999"
 				ns.CharacterCache.FindBattleTag = function(name)
-					if name == "OtherPlayer" then return senderBTag end
+					if name == "OtherPlayer" then
+						return senderBTag
+					end
 					return nil
 				end
 
@@ -724,7 +774,9 @@ describe("Protocol", function()
 
 				local messageSent = false
 				ns.AddonMessages.BuildMessage = function(msgType, data)
-					if msgType == "GR" then messageSent = true end
+					if msgType == "GR" then
+						messageSent = true
+					end
 					return "encoded_message"
 				end
 
@@ -745,11 +797,15 @@ describe("Protocol", function()
 				local ns, Protocol = SetupProtocol()
 
 				-- FindBattleTag returns nil — but payload includes sender BTag
-				ns.CharacterCache.FindBattleTag = function() return nil end
+				ns.CharacterCache.FindBattleTag = function()
+					return nil
+				end
 
 				-- Profile from digest is unknown to us
 				local profileBTag = "Unknown#1111"
-				ns.DB.GetProfile = function() return nil end
+				ns.DB.GetProfile = function()
+					return nil
+				end
 
 				local requestSent = false
 				local requestedBTag
@@ -761,7 +817,9 @@ describe("Protocol", function()
 					end
 					return "encoded_message"
 				end
-				ns.AddonMessages.SendMessage = function() return true end
+				ns.AddonMessages.SendMessage = function()
+					return true
+				end
 
 				local payload = {
 					t = "G",
@@ -781,11 +839,15 @@ describe("Protocol", function()
 				local ns, Protocol = SetupProtocol()
 
 				-- FindBattleTag returns nil and payload has no sender BTag
-				ns.CharacterCache.FindBattleTag = function() return nil end
+				ns.CharacterCache.FindBattleTag = function()
+					return nil
+				end
 
 				local messageSent = false
 				ns.AddonMessages.BuildMessage = function(msgType, data)
-					if msgType == "GR" then messageSent = true end
+					if msgType == "GR" then
+						messageSent = true
+					end
 					return "encoded_message"
 				end
 
@@ -805,11 +867,15 @@ describe("Protocol", function()
 				local ns, Protocol = SetupProtocol()
 
 				local senderBTag = "Sender#9999"
-				ns.CharacterCache.FindBattleTag = function() return senderBTag end
+				ns.CharacterCache.FindBattleTag = function()
+					return senderBTag
+				end
 
 				local messageSent = false
 				ns.AddonMessages.BuildMessage = function(msgType, data)
-					if msgType == "GR" then messageSent = true end
+					if msgType == "GR" then
+						messageSent = true
+					end
 					return "encoded_message"
 				end
 
@@ -829,7 +895,9 @@ describe("Protocol", function()
 
 				local senderBTag = "Sender#9999"
 				ns.CharacterCache.FindBattleTag = function(name)
-					if name == "OtherPlayer" then return senderBTag end
+					if name == "OtherPlayer" then
+						return senderBTag
+					end
 					return nil
 				end
 
@@ -846,7 +914,9 @@ describe("Protocol", function()
 					end
 					return nil
 				end
-				ns.DB.GetCharacterCount = function() return 3 end
+				ns.DB.GetCharacterCount = function()
+					return 3
+				end
 
 				local trackingUpdated = false
 				local trackedTarget, trackedProfile, trackedAu, trackedCu, trackedCc
@@ -882,7 +952,9 @@ describe("Protocol", function()
 
 				local senderBTag = "Sender#9999"
 				ns.CharacterCache.FindBattleTag = function(name)
-					if name == "OtherPlayer" then return senderBTag end
+					if name == "OtherPlayer" then
+						return senderBTag
+					end
 					return nil
 				end
 
@@ -898,7 +970,9 @@ describe("Protocol", function()
 					end
 					return nil
 				end
-				ns.DB.GetCharacterCount = function() return 1 end
+				ns.DB.GetCharacterCount = function()
+					return 1
+				end
 
 				-- Simulate that correction was already sent this session
 				ns.Gossip.HasSentCorrection = function(targetBt, profileBt)
@@ -928,7 +1002,9 @@ describe("Protocol", function()
 
 				local senderBTag = "Sender#9999"
 				ns.CharacterCache.FindBattleTag = function(name)
-					if name == "OtherPlayer" then return senderBTag end
+					if name == "OtherPlayer" then
+						return senderBTag
+					end
 					return nil
 				end
 
@@ -944,9 +1020,11 @@ describe("Protocol", function()
 							characters = {},
 						}
 					end
-					return nil  -- profile2 is unknown
+					return nil -- profile2 is unknown
 				end
-				ns.DB.GetCharacterCount = function() return 3 end
+				ns.DB.GetCharacterCount = function()
+					return 3
+				end
 
 				local requestedBTags = {}
 				ns.AddonMessages.BuildMessage = function(msgType, data)
@@ -956,14 +1034,16 @@ describe("Protocol", function()
 					end
 					return "encoded_message"
 				end
-				ns.AddonMessages.SendMessage = function() return true end
+				ns.AddonMessages.SendMessage = function()
+					return true
+				end
 
 				local payload = {
 					t = "G",
 					b = senderBTag,
 					e = {
-						{ b = profile1, au = 1700000100, cu = 1700000200, cc = 3 },  -- match, no action
-						{ b = profile2, au = 1700000050, cu = 1700000050, cc = 1 },  -- unknown, request
+						{ b = profile1, au = 1700000100, cu = 1700000200, cc = 3 }, -- match, no action
+						{ b = profile2, au = 1700000050, cu = 1700000050, cc = 1 }, -- unknown, request
 					},
 				}
 
@@ -991,7 +1071,9 @@ describe("Protocol", function()
 
 				-- Required for the post-send tracking update
 				ns.CharacterCache.FindBattleTag = function(name)
-					if name == "OtherPlayer" then return "Sender#9999" end
+					if name == "OtherPlayer" then
+						return "Sender#9999"
+					end
 					return nil
 				end
 				ns.DB.GetProfile = function(bt)
@@ -1000,7 +1082,9 @@ describe("Protocol", function()
 					end
 					return nil
 				end
-				ns.DB.GetCharacterCount = function() return 0 end
+				ns.DB.GetCharacterCount = function()
+					return 0
+				end
 
 				local payload = {
 					t = "GR",
@@ -1039,7 +1123,9 @@ describe("Protocol", function()
 					end
 					return "encoded_message"
 				end
-				ns.AddonMessages.SendMessage = function() return true end
+				ns.AddonMessages.SendMessage = function()
+					return true
+				end
 				ns.Coordinator.SendCharsUpdate = function(bt, chars, ts, channel, target)
 					charsSent = true
 					assert.are.equal(myBTag, bt)
@@ -1068,14 +1154,18 @@ describe("Protocol", function()
 					sentAfter = af
 				end
 
-				ns.CharacterCache.FindBattleTag = function() return "Sender#9999" end
+				ns.CharacterCache.FindBattleTag = function()
+					return "Sender#9999"
+				end
 				ns.DB.GetProfile = function(bt)
 					if bt == profileBTag then
 						return { aliasUpdatedAt = 1700000100, charsUpdatedAt = 1700000200, characters = {} }
 					end
 					return nil
 				end
-				ns.DB.GetCharacterCount = function() return 0 end
+				ns.DB.GetCharacterCount = function()
+					return 0
+				end
 
 				local payload = {
 					t = "GR",
@@ -1098,7 +1188,7 @@ describe("Protocol", function()
 
 				local payload = {
 					t = "GR",
-					b = "",  -- invalid
+					b = "", -- invalid
 					af = 0,
 				}
 
@@ -1114,7 +1204,9 @@ describe("Protocol", function()
 				local senderBTag = "Sender#9999"
 
 				ns.CharacterCache.FindBattleTag = function(name)
-					if name == "OtherPlayer" then return senderBTag end
+					if name == "OtherPlayer" then
+						return senderBTag
+					end
 					return nil
 				end
 
@@ -1130,7 +1222,9 @@ describe("Protocol", function()
 					return nil
 				end
 				ns.DB.GetCharacterCount = function(profile)
-					if profile and profile.characters then return #profile.characters end
+					if profile and profile.characters then
+						return #profile.characters
+					end
 					return 0
 				end
 				ns.Gossip.SendProfile = function() end
@@ -1166,14 +1260,18 @@ describe("Protocol", function()
 				local ns, Protocol = SetupProtocol()
 
 				local profileBTag = "Gone#9999"
-				ns.DB.GetProfile = function() return nil end
+				ns.DB.GetProfile = function()
+					return nil
+				end
 
 				local profileSent = false
 				ns.Gossip.SendProfile = function()
 					profileSent = true
 				end
 
-				ns.CharacterCache.FindBattleTag = function() return "Sender#9999" end
+				ns.CharacterCache.FindBattleTag = function()
+					return "Sender#9999"
+				end
 
 				local payload = {
 					t = "GR",
