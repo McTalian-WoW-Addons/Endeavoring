@@ -10,8 +10,22 @@ plugins:
       ref: v1.10.2
       uri: https://github.com/trunk-io/plugins
     - id: wbt-configs
-      ref: v0.1.2
+      ref: v0.1.1
       uri: https://github.com/McTalian-WoW-Addons/wow-addon-trunk-configs
+lint:
+  ignore:
+    - linters: [ALL]
+      paths:
+        - .github/docs/**
+        - .github/instructions/**
+        - .github/issue-drafts/**
+        - .github/prompts/**
+        - .github/plans/**
+        - .github/copilot-instructions.md
+        - .github/*.md
+    - linters: [stylua]
+      paths:
+        - "**/locale/*"
 actions:
   enabled:
     - trunk-announce
