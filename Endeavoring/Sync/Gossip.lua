@@ -46,9 +46,9 @@ corrections within a session. Corrections also update gossipTracking.
 --]]
 
 -- Configuration
-local MAX_DIGEST_ENTRIES = 7  -- Starting cap, dynamically reduced if encoding exceeds 255 bytes
-local MESSAGE_SIZE_LIMIT = 255  -- WoW API hard limit
-local MSG_TYPE = ns.MSG_TYPE  -- Shared message type enum
+local MAX_DIGEST_ENTRIES = 7 -- Starting cap, dynamically reduced if encoding exceeds 255 bytes
+local MESSAGE_SIZE_LIMIT = 255 -- WoW API hard limit
+local MSG_TYPE = ns.MSG_TYPE -- Shared message type enum
 
 -- State
 -- Per-session correction tracking to prevent correction ping-pong
@@ -78,8 +78,6 @@ end
 function Gossip.HasSentCorrection(targetBattleTag, profileBattleTag)
 	return correctionsSent[targetBattleTag] and correctionsSent[targetBattleTag][profileBattleTag] or false
 end
-
-
 
 --- Build a compact digest of known third-party profiles for a target player.
 --- Each entry contains timestamps and character count so the receiver can
@@ -155,12 +153,17 @@ function Gossip.BuildDigest(targetBattleTag)
 		}
 		local encoded = ns.AddonMessages.BuildMessage(MSG_TYPE.GOSSIP_DIGEST, digestData)
 		if encoded and #encoded <= MESSAGE_SIZE_LIMIT then
-			DebugPrint(string.format("BuildDigest: %d entries, %d bytes (of %d candidates)", #entries, #encoded, #candidates))
+			DebugPrint(
+				string.format("BuildDigest: %d entries, %d bytes (of %d candidates)", #entries, #encoded, #candidates)
+			)
 			return entries
 		end
 		-- Over limit — drop last entry and retry
 		table.remove(entries)
-		DebugPrint(string.format("BuildDigest: trimmed to %d entries (over %d byte limit)", #entries, MESSAGE_SIZE_LIMIT), "ff8800")
+		DebugPrint(
+			string.format("BuildDigest: trimmed to %d entries (over %d byte limit)", #entries, MESSAGE_SIZE_LIMIT),
+			"ff8800"
+		)
 	end
 
 	return entries
@@ -190,7 +193,9 @@ function Gossip.SendDigest(targetBattleTag, targetCharacter)
 	end
 
 	ns.AddonMessages.SendMessage(message, ChatType.Whisper, targetCharacter)
-	DebugPrint(string.format("Sent GOSSIP_DIGEST with %d entries to %s (%s)", #entries, targetBattleTag, targetCharacter))
+	DebugPrint(
+		string.format("Sent GOSSIP_DIGEST with %d entries to %s (%s)", #entries, targetBattleTag, targetCharacter)
+	)
 
 	-- Update content-aware tracking for each entry we included
 	for _, entry in ipairs(entries) do
@@ -240,11 +245,25 @@ function Gossip.SendProfile(targetCharacter, profileBattleTag, afterTimestamp)
 	end
 
 	if #characters > 0 then
-		ns.Coordinator.SendCharsUpdate(profileBattleTag, characters, profile.charsUpdatedAt or 0, ChatType.Whisper, targetCharacter)
+		ns.Coordinator.SendCharsUpdate(
+			profileBattleTag,
+			characters,
+			profile.charsUpdatedAt or 0,
+			ChatType.Whisper,
+			targetCharacter
+		)
 	end
 
-	DebugPrint(string.format("SendProfile: sent %s (%s) with %d chars (after=%d) to %s",
-		profileBattleTag, profile.alias, #characters, afterTimestamp, targetCharacter))
+	DebugPrint(
+		string.format(
+			"SendProfile: sent %s (%s) with %d chars (after=%d) to %s",
+			profileBattleTag,
+			profile.alias,
+			#characters,
+			afterTimestamp,
+			targetCharacter
+		)
+	)
 end
 
 --- Send alias correction when we detect sender has stale data
@@ -275,7 +294,7 @@ end
 function Gossip.CorrectStaleChars(sender, battleTag, correctTimestamp, senderTimestamp)
 	-- Send all characters added after their timestamp
 	local newerChars = ns.DB.GetProfileCharactersAddedAfter(battleTag, senderTimestamp)
-	
+
 	if #newerChars > 0 then
 		ns.Coordinator.SendCharsUpdate(battleTag, newerChars, correctTimestamp, ChatType.Whisper, sender)
 		DebugPrint(string.format("Sent %d updated character(s) for %s back to %s", #newerChars, battleTag, sender))

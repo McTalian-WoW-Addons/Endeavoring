@@ -12,33 +12,33 @@ local function InitializeTabSystem(frame)
 	-- Apply TabSystemOwnerMixin to main frame
 	Mixin(frame, TabSystemOwnerMixin)
 	TabSystemOwnerMixin.OnLoad(frame)
-	
+
 	-- Create TabSystem child frame programmatically
 	local tabSystem = CreateFrame("Frame", nil, frame, "HorizontalLayoutFrame")
 	Mixin(tabSystem, TabSystemMixin)
-	
+
 	-- Configure TabSystem properties BEFORE OnLoad (used during initialization)
 	tabSystem.minTabWidth = 100
 	tabSystem.maxTabWidth = 150
 	tabSystem.tabTemplate = "TabSystemTopButtonTemplate"
 	tabSystem.spacing = 1
 	tabSystem.tabSelectSound = SOUNDKIT.IG_CHARACTER_INFO_TAB
-	
+
 	-- Initialize TabSystem (creates frame pool with tabTemplate)
 	tabSystem:OnLoad()
-	
+
 	-- Position TabSystem below header (hanging off top)
 	tabSystem:SetPoint("BOTTOMLEFT", frame.header, "BOTTOMLEFT", 8, -2)
-	
+
 	-- Link TabSystem to frame
 	frame.TabSystem = tabSystem
 	frame:SetTabSystem(tabSystem)
-	
+
 	-- Register tabs with their content frames
 	frame.tasksTabID = frame:AddNamedTab(L["Tasks"], ns.Tasks.CreateTab(frame))
 	frame.leaderboardTabID = frame:AddNamedTab(L["Leaderboard"], ns.Leaderboard.CreateTab(frame))
 	frame.activityTabID = frame:AddNamedTab(L["Activity"], ns.Activity.CreateTab(frame))
-	
+
 	-- Hook tab selection to save preference
 	local originalSetTab = frame.SetTab
 	frame.SetTab = function(self, tabID, ...)
@@ -47,9 +47,9 @@ local function InitializeTabSystem(frame)
 			ns.Settings.SaveLastTab(tabID)
 		end
 	end
-	
+
 	-- Set initial tab based on user preference
-	local startupTab = frame.tasksTabID  -- Default to Tasks
+	local startupTab = frame.tasksTabID -- Default to Tasks
 	if ns.Settings then
 		local startupTabID = ns.Settings.GetStartupTab()
 		if startupTabID == 1 then
@@ -81,10 +81,10 @@ local function CreateMainFrame()
 	frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
 	frame:SetFrameStrata("DIALOG")
 	frame:SetClampedToScreen(true)
-	
+
 	-- Register with UISpecialFrames to allow ESC key to close
 	tinsert(UISpecialFrames, "EndeavoringFrame")
-	
+
 	-- Settings gear button next to close button
 	local settingsButton = CreateFrame("Button", nil, frame)
 	settingsButton:SetFrameLevel(EndeavoringFrameCloseButton:GetFrameLevel())
@@ -153,14 +153,14 @@ eventFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 eventFrame:SetScript("OnEvent", function(_, event, ...)
 	if event == "PLAYER_ENTERING_WORLD" then
 		local isLogin, isReload = ...
-		
+
 		-- Initialize database
 		ns.DB.Init()
-		
+
 		-- Initialize sync service
 		ns.AddonMessages.Init()
 		ns.AddonMessages.RegisterListener()
-		
+
 		-- Register current character
 		local success = ns.DB.RegisterCurrentCharacter()
 		if success then
@@ -169,12 +169,14 @@ eventFrame:SetScript("OnEvent", function(_, event, ...)
 				ns.Coordinator.SendManifestDebounced()
 			end
 		end
-		
+
 		ns.Commands.Register()
 
 		ns.API.ViewActiveNeighborhood()
-		RunNextFrame(function() ns.API.RequestPlayerHouses() end)
-		
+		RunNextFrame(function()
+			ns.API.RequestPlayerHouses()
+		end)
+
 		return
 	end
 
@@ -204,12 +206,12 @@ eventFrame:SetScript("OnEvent", function(_, event, ...)
 	if event == "INITIATIVE_COMPLETED" or event == "INITIATIVE_TASK_COMPLETED" then
 		RefreshInitiativeUI()
 	end
-	
+
 	if event == "INITIATIVE_ACTIVITY_LOG_UPDATED" then
 		-- Activity log has been loaded/updated
 		ns.ActivityLogCache.OnActivityLogUpdated()
 	end
-	
+
 	if event == "GUILD_ROSTER_UPDATE" then
 		-- Debounced broadcast on guild roster changes (with random delay)
 		ns.Coordinator.OnGuildRosterUpdate()

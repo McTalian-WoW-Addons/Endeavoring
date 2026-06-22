@@ -10,8 +10,8 @@ local L = ns.L
 -- Quest reward data is loaded lazily. These track in-flight requests so we
 -- only call RequestLoadQuestByID once per quest per session and know when to
 -- re-render after QUEST_DATA_LOAD_RESULT fires.
-local pendingQuestLoads = {}  -- questID → true while load is outstanding
-local loadedQuestIDs = {}     -- questID → true once confirmed loaded/handled
+local pendingQuestLoads = {} -- questID → true while load is outstanding
+local loadedQuestIDs = {} -- questID → true once confirmed loaded/handled
 local rewardRefreshPending = false
 
 local function BuildSortedTasks(initiativeInfo)
@@ -174,9 +174,10 @@ local function CreateTaskRow(parent, index)
 	row.contributionIcon:SetAtlas("housing-dashboard-tasks-listitem-flag")
 	row.contributionIcon:SetSize(32, 32)
 	row.contributionIcon:SetPoint("CENTER", row.contributionContainer, "CENTER", 0, 0)
-	
+
 	-- Contribution value overlaid on icon (centered)
-	row.contributionContainer.contribution = row.contributionContainer:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	row.contributionContainer.contribution =
+		row.contributionContainer:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	row.contribution = row.contributionContainer.contribution
 	row.contribution:SetPoint("CENTER", row.contributionIcon, "CENTER", 0, 2)
 
@@ -190,7 +191,7 @@ local function CreateTaskRow(parent, index)
 	row.xp = row.xpContainer.xp
 	row.xp:SetPoint("CENTER", row.xpContainer, "CENTER", 0, 0)
 	row.xp:SetJustifyH("CENTER")
-	
+
 	row.xpContainer.xpIcon = row.xpContainer:CreateTexture(nil, "ARTWORK")
 	row.xpIcon = row.xpContainer.xpIcon
 	row.xpIcon:SetAtlas("housing-dashboard-estateXP-icon")
@@ -208,7 +209,7 @@ local function CreateTaskRow(parent, index)
 	row.coupons:SetPoint("CENTER", row.couponsContainer, "CENTER", 0, 0)
 	row.coupons:SetJustifyH("CENTER")
 	row.coupons:SetWidth(constants.TASK_COUPONS_WIDTH) -- Account for scrollbar width
-	
+
 	row.couponsContainer.couponsIcon = row.couponsContainer:CreateTexture(nil, "ARTWORK")
 	row.couponsIcon = row.couponsContainer.couponsIcon
 	row.couponsIcon:SetSize(16, 16)
@@ -220,7 +221,7 @@ local function CreateTaskRow(parent, index)
 		if not self.data or not self.data.ID then
 			return
 		end
-		
+
 		if IsModifiedClick("QUESTWATCHTOGGLE") then
 			-- Shift-click to track/untrack
 			local trackedTasks = C_NeighborhoodInitiative.GetTrackedInitiativeTasks()
@@ -233,30 +234,30 @@ local function CreateTaskRow(parent, index)
 					end
 				end
 			end
-			
+
 			if isTracked then
 				C_NeighborhoodInitiative.RemoveTrackedInitiativeTask(self.data.ID)
 			else
 				C_NeighborhoodInitiative.AddTrackedInitiativeTask(self.data.ID)
 			end
-			
+
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		end
 	end)
-	
+
 	row:SetScript("OnEnter", function(self)
 		if not self.data then
 			return
 		end
 		GameTooltip:SetOwner(self, "ANCHOR_CURSOR_RIGHT", 8, 0)
 		GameTooltip_SetTitle(GameTooltip, self.data.taskName or "Task")
-		
+
 		-- Show full description if available
 		if self.data.description and self.data.description ~= "" then
 			GameTooltip_AddNormalLine(GameTooltip, self.data.description, true)
 			GameTooltip_AddBlankLineToTooltip(GameTooltip)
 		end
-		
+
 		-- Show requirements
 		if self.data.requirementsList then
 			for _, requirement in ipairs(self.data.requirementsList) do
@@ -266,16 +267,20 @@ local function CreateTaskRow(parent, index)
 				end
 			end
 		end
-		
+
 		-- Show detailed rewards
 		if self.data.rewardQuestID then
 			GameTooltip_AddBlankLineToTooltip(GameTooltip)
-			GameTooltip_AddQuestRewardsToTooltip(GameTooltip, self.data.rewardQuestID, TOOLTIP_QUEST_REWARDS_STYLE_INITIATIVE_TASK)
+			GameTooltip_AddQuestRewardsToTooltip(
+				GameTooltip,
+				self.data.rewardQuestID,
+				TOOLTIP_QUEST_REWARDS_STYLE_INITIATIVE_TASK
+			)
 		end
-		
+
 		GameTooltip_AddBlankLineToTooltip(GameTooltip)
 		GameTooltip_AddInstructionLine(GameTooltip, L["Shift-click to track task"])
-		
+
 		GameTooltip:Show()
 	end)
 	row:SetScript("OnLeave", GameTooltip_Hide)
@@ -287,12 +292,12 @@ local function GetCouponsInfo(rewardQuestID)
 	if not rewardQuestID or rewardQuestID == 0 then
 		return "--", nil
 	end
-	
+
 	local currencyInfo = ns.QuestRewards.GetCurrencyReward(rewardQuestID, 1)
 	if currencyInfo then
 		return tostring(currencyInfo.totalRewardAmount or 0), currencyInfo.texture
 	end
-	
+
 	return "--", nil
 end
 
@@ -363,7 +368,7 @@ function Tasks.Refresh()
 		end
 		row.data = task
 		row.name:SetText(task.taskName or "")
-		
+
 		-- Set description and handle vertical centering
 		local hasDescription = task.description and task.description ~= ""
 		if hasDescription then
@@ -373,13 +378,13 @@ function Tasks.Refresh()
 			row.description:Hide()
 		end
 		CenterTaskText(row, hasDescription)
-		
+
 		-- Set contribution value
 		row.contribution:SetText(task.progressContributionAmount or "--")
-		
+
 		-- Set House XP value
 		row.xp:SetText(GetHouseXPValue(task.rewardQuestID))
-		
+
 		-- Set coupons value and icon
 		local couponsValue, couponsTexture = GetCouponsInfo(task.rewardQuestID)
 		row.coupons:SetText(couponsValue)
@@ -480,7 +485,7 @@ function Tasks.CreateTab(parent)
 	xpHeader.text:SetPoint("CENTER")
 	xpHeader.text:SetJustifyH("CENTER")
 	xpHeader.text:SetText(L["House XP"])
-	
+
 	local couponsHeader = CreateFrame("Button", nil, header)
 	couponsHeader:SetPoint("LEFT", xpHeader, "RIGHT", 0, 0)
 	couponsHeader:SetSize(constants.TASK_COUPONS_WIDTH - scrollbarOffset, constants.TASK_HEADER_HEIGHT)

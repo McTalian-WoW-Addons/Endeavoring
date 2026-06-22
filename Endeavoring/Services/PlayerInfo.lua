@@ -16,7 +16,7 @@ end
 --- Get the current character's name
 --- @return string characterName The character name
 function PlayerInfo.GetCharacterName()
-  return PlayerInfo.GetCharacterInfo().name
+	return PlayerInfo.GetCharacterInfo().name
 end
 
 --- Get the current player's name (simple wrapper for UnitName)

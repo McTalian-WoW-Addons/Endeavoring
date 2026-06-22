@@ -21,9 +21,7 @@ end
 -- Tests ------------------------------------------------------------------
 
 describe("CharacterCache", function()
-
 	describe("FindBattleTag", function()
-
 		it("should return BattleTag for exact character name match", function()
 			local ns, CharacterCache = SetupCharacterCache()
 
@@ -44,7 +42,9 @@ describe("CharacterCache", function()
 		it("should return nil for unknown character name", function()
 			local ns, CharacterCache = SetupCharacterCache()
 
-			ns.DB.GetAllProfiles = function() return {} end
+			ns.DB.GetAllProfiles = function()
+				return {}
+			end
 
 			local result = CharacterCache.FindBattleTag("NobodyKnowsMe")
 			assert.is_nil(result)
@@ -106,7 +106,9 @@ describe("CharacterCache", function()
 		it("should handle nil input gracefully", function()
 			local ns, CharacterCache = SetupCharacterCache()
 
-			ns.DB.GetAllProfiles = function() return {} end
+			ns.DB.GetAllProfiles = function()
+				return {}
+			end
 
 			local result = CharacterCache.FindBattleTag(nil)
 			assert.is_nil(result)
@@ -115,7 +117,9 @@ describe("CharacterCache", function()
 		it("should include own profile characters in cache", function()
 			local ns, CharacterCache = SetupCharacterCache()
 
-			ns.DB.GetAllProfiles = function() return {} end
+			ns.DB.GetAllProfiles = function()
+				return {}
+			end
 			ns.DB.GetMyProfile = function()
 				return {
 					battleTag = "Me#1234",
@@ -132,7 +136,9 @@ describe("CharacterCache", function()
 		it("should find own profile via realm-stripped name", function()
 			local ns, CharacterCache = SetupCharacterCache()
 
-			ns.DB.GetAllProfiles = function() return {} end
+			ns.DB.GetAllProfiles = function()
+				return {}
+			end
 			ns.DB.GetMyProfile = function()
 				return {
 					battleTag = "Me#1234",
@@ -171,7 +177,6 @@ describe("CharacterCache", function()
 	end)
 
 	describe("Invalidate", function()
-
 		it("should rebuild cache after full invalidation", function()
 			local ns, CharacterCache = SetupCharacterCache()
 

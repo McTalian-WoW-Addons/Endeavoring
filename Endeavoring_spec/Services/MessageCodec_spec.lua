@@ -14,12 +14,24 @@ describe("MessageCodec", function()
 
 		-- Stub C_EncodingUtil with identity transforms for pipeline testing
 		_G.C_EncodingUtil = {
-			SerializeCBOR = function(data) return "cbor:" .. tostring(data) end,
-			DeserializeCBOR = function(data) return { decoded = true } end,
-			CompressString = function(s) return "compressed:" .. s end,
-			DecompressString = function(s) return s:gsub("^compressed:", "") end,
-			EncodeBase64 = function(s) return "b64:" .. s end,
-			DecodeBase64 = function(s) return s:gsub("^b64:", "") end,
+			SerializeCBOR = function(data)
+				return "cbor:" .. tostring(data)
+			end,
+			DeserializeCBOR = function(data)
+				return { decoded = true }
+			end,
+			CompressString = function(s)
+				return "compressed:" .. s
+			end,
+			DecompressString = function(s)
+				return s:gsub("^compressed:", "")
+			end,
+			EncodeBase64 = function(s)
+				return "b64:" .. s
+			end,
+			DecodeBase64 = function(s)
+				return s:gsub("^b64:", "")
+			end,
 		}
 
 		nsMocks.LoadAddonFile("Endeavoring/Services/MessageCodec.lua", ns)
@@ -66,28 +78,36 @@ describe("MessageCodec", function()
 		end)
 
 		it("returns nil when CBOR serialization returns empty", function()
-			_G.C_EncodingUtil.SerializeCBOR = function() return "" end
+			_G.C_EncodingUtil.SerializeCBOR = function()
+				return ""
+			end
 			local encoded, err = ns.MessageCodec.Encode({ test = true })
 			assert.is_nil(encoded)
 			assert.truthy(err:find("serialization"))
 		end)
 
 		it("returns nil when CBOR serialization returns nil", function()
-			_G.C_EncodingUtil.SerializeCBOR = function() return nil end
+			_G.C_EncodingUtil.SerializeCBOR = function()
+				return nil
+			end
 			local encoded, err = ns.MessageCodec.Encode({ test = true })
 			assert.is_nil(encoded)
 			assert.truthy(err:find("serialization"))
 		end)
 
 		it("returns nil when compression returns empty", function()
-			_G.C_EncodingUtil.CompressString = function() return "" end
+			_G.C_EncodingUtil.CompressString = function()
+				return ""
+			end
 			local encoded, err = ns.MessageCodec.Encode({ test = true })
 			assert.is_nil(encoded)
 			assert.truthy(err:find("compression"))
 		end)
 
 		it("returns nil when base64 encoding returns empty", function()
-			_G.C_EncodingUtil.EncodeBase64 = function() return "" end
+			_G.C_EncodingUtil.EncodeBase64 = function()
+				return ""
+			end
 			local encoded, err = ns.MessageCodec.Encode({ test = true })
 			assert.is_nil(encoded)
 			assert.truthy(err:find("encoding"))
@@ -146,21 +166,27 @@ describe("MessageCodec", function()
 		end)
 
 		it("returns nil when base64 decode returns empty", function()
-			_G.C_EncodingUtil.DecodeBase64 = function() return "" end
+			_G.C_EncodingUtil.DecodeBase64 = function()
+				return ""
+			end
 			local data, err = ns.MessageCodec.Decode("test")
 			assert.is_nil(data)
 			assert.truthy(err:find("Base64"))
 		end)
 
 		it("returns nil when decompression returns empty", function()
-			_G.C_EncodingUtil.DecompressString = function() return "" end
+			_G.C_EncodingUtil.DecompressString = function()
+				return ""
+			end
 			local data, err = ns.MessageCodec.Decode("test")
 			assert.is_nil(data)
 			assert.truthy(err:find("decompression"))
 		end)
 
 		it("returns nil when CBOR deserialization returns nil", function()
-			_G.C_EncodingUtil.DeserializeCBOR = function() return nil end
+			_G.C_EncodingUtil.DeserializeCBOR = function()
+				return nil
+			end
 			local data, err = ns.MessageCodec.Decode("test")
 			assert.is_nil(data)
 			assert.truthy(err:find("deserialization"))
@@ -178,7 +204,9 @@ describe("MessageCodec", function()
 		end)
 
 		it("returns nil when encoding fails", function()
-			_G.C_EncodingUtil.SerializeCBOR = function() return nil end
+			_G.C_EncodingUtil.SerializeCBOR = function()
+				return nil
+			end
 			local size = ns.MessageCodec.EstimateSize({ test = true })
 			assert.is_nil(size)
 		end)

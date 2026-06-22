@@ -102,7 +102,9 @@ function nsMocks.CreateNS()
 
 	-- Locale table (mirrors locale/init.lua — key falls back to key itself)
 	ns.L = setmetatable({}, {
-		__index = function(_, k) return k end,
+		__index = function(_, k)
+			return k
+		end,
 	})
 
 	-- State
@@ -118,9 +120,15 @@ function nsMocks.CreateNS()
 
 	-- MessageCodec stub
 	ns.MessageCodec = {
-		Encode = function() return "encoded", nil end,
-		Decode = function() return nil, "not stubbed" end,
-		EstimateSize = function() return 0 end,
+		Encode = function()
+			return "encoded", nil
+		end,
+		Decode = function()
+			return nil, "not stubbed"
+		end,
+		EstimateSize = function()
+			return 0
+		end,
 	}
 
 	-- AddonMessages stub
@@ -135,15 +143,23 @@ function nsMocks.CreateNS()
 			Channel = "CHANNEL",
 		},
 		Init = function() end,
-		BuildMessage = function() return "encoded_message" end,
-		SendMessage = function() return true end,
+		BuildMessage = function()
+			return "encoded_message"
+		end,
+		SendMessage = function()
+			return true
+		end,
 		RegisterListener = function() end,
 	}
 
 	-- DB stub
 	ns.DB = {
-		IsVerboseDebug = function() return false end,
-		GetMyBattleTag = function() return "TestPlayer#1234" end,
+		IsVerboseDebug = function()
+			return false
+		end,
+		GetMyBattleTag = function()
+			return "TestPlayer#1234"
+		end,
 		GetMyProfile = function()
 			return {
 				battleTag = "TestPlayer#1234",
@@ -153,35 +169,63 @@ function nsMocks.CreateNS()
 				characters = {},
 			}
 		end,
-		GetProfile = function() return nil end,
-		GetAllProfiles = function() return {} end,
-		GetCharacterCount = function() return 0 end,
-		UpdateProfileAlias = function() return true end,
-		AddCharactersToProfile = function() return true end,
-		GetCharactersAddedAfter = function() return {} end,
-		GetProfileCharactersAddedAfter = function() return {} end,
-		GetGossipTracking = function() return {} end,
+		GetProfile = function()
+			return nil
+		end,
+		GetAllProfiles = function()
+			return {}
+		end,
+		GetCharacterCount = function()
+			return 0
+		end,
+		UpdateProfileAlias = function()
+			return true
+		end,
+		AddCharactersToProfile = function()
+			return true
+		end,
+		GetCharactersAddedAfter = function()
+			return {}
+		end,
+		GetProfileCharactersAddedAfter = function()
+			return {}
+		end,
+		GetGossipTracking = function()
+			return {}
+		end,
 		UpdateGossipTracking = function() end,
 	}
 
 	-- PlayerInfo stub
 	ns.PlayerInfo = {
-		IsInGuild = function() return true end,
-		IsInHomeGroup = function() return false end,
-		IsInInstanceGroup = function() return false end,
-		IsGuildOfficer = function() return false end,
+		IsInGuild = function()
+			return true
+		end,
+		IsInHomeGroup = function()
+			return false
+		end,
+		IsInInstanceGroup = function()
+			return false
+		end,
+		IsGuildOfficer = function()
+			return false
+		end,
 	}
 
 	-- CharacterCache stub
 	ns.CharacterCache = {
-		FindBattleTag = function() return nil end,
+		FindBattleTag = function()
+			return nil
+		end,
 		Invalidate = function() end,
 	}
 
 	-- Coordinator stub
 	ns.Coordinator = {
 		Init = function() end,
-		SendCharsUpdate = function() return true end,
+		SendCharsUpdate = function()
+			return true
+		end,
 		SendManifest = function() end,
 		SendManifestDebounced = function() end,
 		OnGuildRosterUpdate = function() end,
@@ -192,7 +236,9 @@ function nsMocks.CreateNS()
 		SendDigest = function() end,
 		SendProfile = function() end,
 		MarkCorrectionSent = function() end,
-		HasSentCorrection = function() return false end,
+		HasSentCorrection = function()
+			return false
+		end,
 		CorrectStaleAlias = function() end,
 		CorrectStaleChars = function() end,
 	}

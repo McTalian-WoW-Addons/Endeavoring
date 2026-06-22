@@ -17,9 +17,15 @@ describe("AddonMessages", function()
 
 		-- Reset C_ChatInfo for each test
 		_G.C_ChatInfo = {
-			RegisterAddonMessagePrefix = function() return true end,
-			SendAddonMessage = function() return Enum.SendAddonMessageResult.Success end,
-			InChatMessagingLockdown = function() return false end,
+			RegisterAddonMessagePrefix = function()
+				return true
+			end,
+			SendAddonMessage = function()
+				return Enum.SendAddonMessageResult.Success
+			end,
+			InChatMessagingLockdown = function()
+				return false
+			end,
 		}
 
 		ns.Coordinator.Init = function() end
@@ -29,10 +35,18 @@ describe("AddonMessages", function()
 			return "encoded_payload", nil
 		end
 
-		ns.PlayerInfo.IsInGuild = function() return true end
-		ns.PlayerInfo.IsInHomeGroup = function() return false end
-		ns.PlayerInfo.IsInInstanceGroup = function() return false end
-		ns.PlayerInfo.IsGuildOfficer = function() return false end
+		ns.PlayerInfo.IsInGuild = function()
+			return true
+		end
+		ns.PlayerInfo.IsInHomeGroup = function()
+			return false
+		end
+		ns.PlayerInfo.IsInInstanceGroup = function()
+			return false
+		end
+		ns.PlayerInfo.IsGuildOfficer = function()
+			return false
+		end
 
 		nsMocks.LoadAddonFile("Endeavoring/Services/AddonMessages.lua", ns)
 	end)
@@ -69,7 +83,9 @@ describe("AddonMessages", function()
 
 		it("initializes coordinator", function()
 			local coordInitCalled = false
-			ns.Coordinator.Init = function() coordInitCalled = true end
+			ns.Coordinator.Init = function()
+				coordInitCalled = true
+			end
 			ns.AddonMessages.Init()
 			assert.is_true(coordInitCalled)
 		end)
@@ -97,7 +113,9 @@ describe("AddonMessages", function()
 		end)
 
 		it("returns nil when encoding fails", function()
-			ns.MessageCodec.Encode = function() return nil, "encode error" end
+			ns.MessageCodec.Encode = function()
+				return nil, "encode error"
+			end
 			local result = ns.AddonMessages.BuildMessage("M", {})
 			assert.is_nil(result)
 		end)
@@ -117,7 +135,9 @@ describe("AddonMessages", function()
 		end)
 
 		it("rejects guild message when not in guild", function()
-			ns.PlayerInfo.IsInGuild = function() return false end
+			ns.PlayerInfo.IsInGuild = function()
+				return false
+			end
 			local result = ns.AddonMessages.SendMessage("test_msg", "GUILD")
 			assert.is_false(result)
 		end)
@@ -143,7 +163,9 @@ describe("AddonMessages", function()
 		end)
 
 		it("sends party message when in home group", function()
-			ns.PlayerInfo.IsInHomeGroup = function() return true end
+			ns.PlayerInfo.IsInHomeGroup = function()
+				return true
+			end
 			local result = ns.AddonMessages.SendMessage("test_msg", "PARTY")
 			assert.is_true(result)
 		end)
@@ -159,13 +181,17 @@ describe("AddonMessages", function()
 		end)
 
 		it("sends officer message when officer", function()
-			ns.PlayerInfo.IsGuildOfficer = function() return true end
+			ns.PlayerInfo.IsGuildOfficer = function()
+				return true
+			end
 			local result = ns.AddonMessages.SendMessage("test_msg", "OFFICER")
 			assert.is_true(result)
 		end)
 
 		it("rejects when chat messaging lockdown is active", function()
-			_G.C_ChatInfo.InChatMessagingLockdown = function() return true, "restricted" end
+			_G.C_ChatInfo.InChatMessagingLockdown = function()
+				return true, "restricted"
+			end
 			local result = ns.AddonMessages.SendMessage("test_msg", "GUILD")
 			assert.is_false(result)
 		end)
@@ -194,7 +220,9 @@ describe("AddonMessages", function()
 			-- Create a fresh ns without calling Init
 			local ns2 = nsMocks.CreateNS()
 			ns2.Coordinator.Init = function() end
-			ns2.MessageCodec.Encode = function() return "encoded" end
+			ns2.MessageCodec.Encode = function()
+				return "encoded"
+			end
 			nsMocks.LoadAddonFile("Endeavoring/Services/AddonMessages.lua", ns2)
 			-- Don't call Init — SendMessage should fail
 			local result = ns2.AddonMessages.SendMessage("test_msg", "GUILD")

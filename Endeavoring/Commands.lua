@@ -56,7 +56,7 @@ local function HandleSyncStatus()
 	else
 		print(ERROR .. " No profile found")
 	end
-	
+
 	-- Show cached profiles
 	local profiles = ns.DB.GetAllProfiles()
 	local count = 0
@@ -104,7 +104,7 @@ end
 local function HandleSyncStats()
 	local stats = ns.Coordinator.GetSyncStats()
 	print(INFO .. " === Sync Timing Statistics ===")
-	
+
 	-- Format time durations
 	local function formatDuration(seconds)
 		if seconds < 60 then
@@ -114,7 +114,7 @@ local function HandleSyncStats()
 		local secs = seconds % 60
 		return string.format("%dm %ds", minutes, secs)
 	end
-	
+
 	print(string.format("  Last manifest: %s ago", formatDuration(stats.timeSinceLastManifest)))
 	print(string.format("  Last roster manifest: %s ago", formatDuration(stats.timeSinceLastRosterManifest)))
 	print("")
@@ -134,40 +134,43 @@ local function DisplayLeaderboard(timeRange)
 		print(ERROR .. " Activity log not available. Make sure you're in a neighborhood with an active Endeavor.")
 		return
 	end
-	
+
 	-- Build leaderboard
 	local leaderboard = ns.Leaderboard.BuildEnriched(activityLog, timeRange)
-	
+
 	if #leaderboard == 0 then
 		print(INFO .. " No activity found for the selected time range.")
 		return
 	end
-	
+
 	-- Display leaderboard
 	local rangeName = ns.Leaderboard.GetTimeRangeName(timeRange)
 	print(string.format(INFO .. " === Contribution Leaderboard (%s) ===", rangeName))
-	
+
 	local maxDisplay = 10
 	for rank, entry in ipairs(leaderboard) do
 		if rank > maxDisplay then
 			break
 		end
-		
+
 		local marker = entry.isLocalPlayer and " (You)" or ""
-		print(string.format("  %d. %s%s: %d points (%d tasks%s)", 
-			rank,
-			entry.displayName,
-			marker,
-			entry.total,
-			entry.entries,
-			(#entry.charNames > 0) and (" with " .. #entry.charNames .. " characters") or ""
-		))
+		print(
+			string.format(
+				"  %d. %s%s: %d points (%d tasks%s)",
+				rank,
+				entry.displayName,
+				marker,
+				entry.total,
+				entry.entries,
+				(#entry.charNames > 0) and (" with " .. #entry.charNames .. " characters") or ""
+			)
+		)
 	end
-	
+
 	if #leaderboard > maxDisplay then
 		print(string.format("  ... and %d more", #leaderboard - maxDisplay))
 	end
-	
+
 	print(INFO .. " Use: /endeavoring leaderboard [all||today||week]")
 end
 
@@ -181,10 +184,10 @@ local function HandleLeaderboard(args)
 	elseif args == "week" then
 		timeRange = ns.Leaderboard.TIME_RANGE.THIS_WEEK
 	end
-	
+
 	-- Always request fresh data - set up one-shot event handler
 	print(INFO .. " Requesting activity log data...")
-	
+
 	local frame = CreateFrame("Frame")
 	frame:RegisterEvent("INITIATIVE_ACTIVITY_LOG_UPDATED")
 	frame:SetScript("OnEvent", function(self, event)
@@ -193,7 +196,7 @@ local function HandleLeaderboard(args)
 			DisplayLeaderboard(timeRange)
 		end
 	end)
-	
+
 	-- Request activity log data
 	ns.API.RequestActivityLog()
 end
@@ -248,7 +251,7 @@ local function RouteCommand(msg)
 	-- Parse command and arguments
 	local command, args = msg:match("^(%S*)%s*(.-)$")
 	command = command:lower()
-	
+
 	if command == "alias" then
 		HandleAlias(args)
 	elseif command == "sync" then

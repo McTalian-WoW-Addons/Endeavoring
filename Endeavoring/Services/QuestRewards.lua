@@ -52,7 +52,9 @@ end
 --- nil/0, then listen for QUEST_DATA_LOAD_RESULT to re-read the values.
 --- @param questID number The quest ID to load
 function QuestRewards.RequestLoad(questID)
-	if not questID or questID == 0 then return end
+	if not questID or questID == 0 then
+		return
+	end
 	if C_QuestLog and C_QuestLog.RequestLoadQuestByID then
 		C_QuestLog.RequestLoadQuestByID(questID)
 	end

@@ -12,12 +12,12 @@ local DebugPrint = ns.DebugPrint
 
 -- Time range constants (in seconds)
 local TIME_RANGE = {
-	CURRENT_ENDEAVOR = 0,   -- Entire duration of active endeavor
-	SEVEN_DAYS = 604800,    -- 7 days
-	ONE_DAY = 86400,        -- 24 hours
-	TWELVE_HOURS = 43200,   -- 12 hours
-	SIX_HOURS = 21600,      -- 6 hours
-	ONE_HOUR = 3600,        -- 1 hour
+	CURRENT_ENDEAVOR = 0, -- Entire duration of active endeavor
+	SEVEN_DAYS = 604800, -- 7 days
+	ONE_DAY = 86400, -- 24 hours
+	TWELVE_HOURS = 43200, -- 12 hours
+	SIX_HOURS = 21600, -- 6 hours
+	ONE_HOUR = 3600, -- 1 hour
 }
 
 -- Filter order for dropdown
@@ -33,8 +33,8 @@ local filterOrder = {
 -- Current filter and sort state
 local state = {
 	timeRange = TIME_RANGE.CURRENT_ENDEAVOR,
-	sortKey = ns.Constants.ACTIVITY_SORT_TIME,  -- Default sort by time (newest first)
-	sortAsc = false,  -- Descending (newest first)
+	sortKey = ns.Constants.ACTIVITY_SORT_TIME, -- Default sort by time (newest first)
+	sortAsc = false, -- Descending (newest first)
 	showMyCharsOnly = false,
 }
 
@@ -44,24 +44,24 @@ local state = {
 local function FormatRelativeTime(timestamp)
 	local now = time()
 	local diff = now - timestamp
-	
+
 	-- Less than 1 minute: "Just now"
 	if diff < 60 then
 		return L["Just now"]
 	end
-	
+
 	-- Less than 1 hour: "Xm ago"
 	if diff < 3600 then
 		local minutes = math.floor(diff / 60)
 		return string.format(L["FMT_MinutesAgo"], minutes)
 	end
-	
+
 	-- Less than 24 hours: "Xh ago"
 	if diff < 86400 then
 		local hours = math.floor(diff / 3600)
 		return string.format(L["FMT_HoursAgo"], hours)
 	end
-	
+
 	-- Less than 7 days: "X days ago"
 	if diff < 604800 then
 		local days = math.floor(diff / 86400)
@@ -71,7 +71,7 @@ local function FormatRelativeTime(timestamp)
 			return string.format(L["FMT_DaysAgo"], days)
 		end
 	end
-	
+
 	-- Older: absolute date "Feb 10 15:42"
 	return date("%b %d %H:%M", timestamp)
 end
@@ -115,7 +115,7 @@ local function BuildFilteredActivity(activityLog)
 	local filtered = {}
 	local myProfile = ns.DB.GetMyProfile()
 	local myCharacters = {}
-	
+
 	-- Build lookup table for "my characters only" filter
 	if state.showMyCharsOnly and myProfile then
 		for charName, _ in pairs(myProfile.characters) do
@@ -193,7 +193,7 @@ local function BuildSortedActivity(activities)
 			if aVal == bVal then
 				-- Tie-breaker: fall back to time (newest first)
 				if a.completionTime == b.completionTime then
-					return a.amount < b.amount  -- Final tie-breaker by amount to ensure consistent order
+					return a.amount < b.amount -- Final tie-breaker by amount to ensure consistent order
 				end
 				return a.completionTime > b.completionTime
 			end
@@ -202,7 +202,7 @@ local function BuildSortedActivity(activities)
 			if aVal == bVal then
 				-- Tie-breaker: fall back to time (newest first)
 				if a.completionTime == b.completionTime then
-					return a.amount < b.amount  -- Final tie-breaker by amount to ensure consistent order
+					return a.amount < b.amount -- Final tie-breaker by amount to ensure consistent order
 				end
 				return a.completionTime > b.completionTime
 			end
@@ -255,23 +255,23 @@ end
 --- @param newSortKey string The sort key constant
 local function SetSort(content, newSortKey)
 	local constants = ns.Constants
-	
+
 	if state.sortKey == newSortKey then
 		-- Toggle direction if clicking same column
 		state.sortAsc = not state.sortAsc
 	else
 		-- Set new sort key with smart default direction
 		state.sortKey = newSortKey
-		
+
 		-- Smart defaults based on column type
 		if newSortKey == constants.ACTIVITY_SORT_TIME then
-			state.sortAsc = false  -- Newest first
+			state.sortAsc = false -- Newest first
 		elseif newSortKey == constants.ACTIVITY_SORT_TASK then
-			state.sortAsc = true   -- A-Z
+			state.sortAsc = true -- A-Z
 		elseif newSortKey == constants.ACTIVITY_SORT_CHAR then
-			state.sortAsc = true   -- A-Z
+			state.sortAsc = true -- A-Z
 		elseif newSortKey == constants.ACTIVITY_SORT_CONTRIB then
-			state.sortAsc = false  -- Highest first
+			state.sortAsc = false -- Highest first
 		end
 	end
 
@@ -308,13 +308,13 @@ local function CreateActivityRow(parent, index)
 	local taskFrame = CreateFrame("Frame", nil, row)
 	taskFrame:SetPoint("LEFT", timeText, "RIGHT", 4, 0)
 	taskFrame:SetSize(constants.ACTIVITY_TASK_WIDTH, constants.ACTIVITY_ROW_HEIGHT)
-	
+
 	local taskText = taskFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	taskText:SetAllPoints()
 	taskText:SetJustifyH("LEFT")
 	taskText:SetWordWrap(false)
 	taskFrame.text = taskText
-	
+
 	-- Tooltip support for task name
 	taskFrame:EnableMouse(true)
 	taskFrame:SetScript("OnEnter", function(self)
@@ -334,15 +334,15 @@ local function CreateActivityRow(parent, index)
 	charContainer:SetPoint("TOPLEFT", taskFrame, "TOPRIGHT", 4, -2)
 	charContainer:SetPoint("BOTTOMLEFT", taskFrame, "BOTTOMRIGHT", 4, 2)
 	charContainer:SetWidth(constants.ACTIVITY_CHAR_WIDTH)
-	
+
 	-- Endeavoring icon (shown when profile exists)
 	local icon = charContainer:CreateTexture(nil, "OVERLAY")
 	icon:SetSize(16, 16)
 	icon:SetPoint("RIGHT", charContainer, "RIGHT", 0, 0)
 	icon:SetTexture("Interface/AddOns/Endeavoring/Icons/endeavoring.png")
-	icon:Hide()  -- Hidden by default
+	icon:Hide() -- Hidden by default
 	charContainer.icon = icon
-	
+
 	-- Top line: Player name (Alias/BattleTag, white font)
 	local playerText = charContainer:CreateFontString(nil, "OVERLAY", "GameFontWhite")
 	playerText:SetPoint("LEFT", icon, "RIGHT", 4, 0)
@@ -350,7 +350,7 @@ local function CreateActivityRow(parent, index)
 	playerText:SetJustifyH("LEFT")
 	playerText:SetWordWrap(false)
 	charContainer.playerText = playerText
-	
+
 	-- Bottom line: Character name (smaller font, gray)
 	local charText = charContainer:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall2")
 	charText:SetPoint("TOPLEFT", playerText, "BOTTOMLEFT", 0, -2)
@@ -359,7 +359,7 @@ local function CreateActivityRow(parent, index)
 	charText:SetWordWrap(false)
 	charText:SetTextColor(0.7, 0.7, 0.7)
 	charContainer.charText = charText
-	
+
 	row.charContainer = charContainer
 
 	-- Contribution column (with tooltip support)
@@ -367,13 +367,13 @@ local function CreateActivityRow(parent, index)
 	contribContainer:SetPoint("LEFT", charContainer, "RIGHT", 0, 0)
 	contribContainer:SetSize(constants.ACTIVITY_CONTRIB_WIDTH, constants.ACTIVITY_ROW_HEIGHT)
 	contribContainer:EnableMouse(true)
-	
+
 	local contribText = contribContainer:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 	contribText:SetAllPoints()
 	contribText:SetJustifyH("RIGHT")
 	contribText:SetWordWrap(false)
 	contribContainer.text = contribText
-	
+
 	-- Tooltip for 0 contribution values when endeavor is completed
 	contribContainer:SetScript("OnEnter", function(self)
 		if self.amount == 0 and ns.API.IsInitiativeCompleted() then
@@ -386,7 +386,7 @@ local function CreateActivityRow(parent, index)
 	contribContainer:SetScript("OnLeave", function()
 		GameTooltip:Hide()
 	end)
-	
+
 	row.contribContainer = contribContainer
 	row.contribText = contribText
 
@@ -416,39 +416,39 @@ local function UpdateVisibleRows(content)
 	if not content.sortedData or #content.sortedData == 0 then
 		return
 	end
-	
+
 	local sorted = content.sortedData
 	local constants = ns.Constants
 	local rows = content.rows
-	
+
 	-- Calculate scroll offset and visible range
 	local scrollOffset = content.scrollFrame:GetVerticalScroll()
 	local firstVisibleIndex = math.floor(scrollOffset / constants.ACTIVITY_ROW_HEIGHT) + 1
 	local lastVisibleIndex = math.min(firstVisibleIndex + #rows - 1, #sorted)
-	
+
 	-- Update each row in the pool
 	for poolIndex = 1, #rows do
 		local dataIndex = firstVisibleIndex + poolIndex - 1
 		local row = rows[poolIndex]
-		
+
 		if dataIndex <= #sorted then
 			local entry = sorted[dataIndex]
-			
+
 			-- Position row based on its data index (not pool index)
 			row:ClearAllPoints()
 			row:SetPoint("TOPLEFT", 0, -(dataIndex - 1) * constants.ACTIVITY_ROW_HEIGHT)
-			
+
 			-- Time column
 			row.timeText:SetText(FormatRelativeTime(entry.completionTime))
-			
+
 			-- Task name column (with tooltip)
 			row.taskFrame.text:SetText(entry.taskName)
 			row.taskFrame.fullTaskName = entry.taskName
-			
+
 			-- Character/Account column
 			local battleTag = ns.CharacterCache.FindBattleTag(entry.playerName)
 			local charContainer = row.charContainer
-			
+
 			charContainer.charText:SetText(entry.playerName)
 			local hasProfile = false
 			if battleTag then
@@ -465,14 +465,14 @@ local function UpdateVisibleRows(content)
 				charContainer.icon:Hide()
 				charContainer.playerText:SetText("")
 			end
-			
+
 			CenterCharText(row, hasProfile)
-			
+
 			-- Contribution column
 			local amount = entry.amount or 0
 			row.contribContainer.amount = amount
 			row.contribText:SetText(string.format("+%.3f", amount))
-			
+
 			row:Show()
 		else
 			-- Hide rows beyond data range
@@ -532,16 +532,16 @@ local function UpdateActivityDisplay()
 
 	-- Store sorted data for virtual scrolling
 	content.sortedData = sorted
-	
+
 	-- Calculate visible rows and total height
 	local constants = ns.Constants
 	local scrollFrameHeight = content.scrollFrame:GetHeight() or 400
-	local maxVisibleRows = math.ceil(scrollFrameHeight / constants.ACTIVITY_ROW_HEIGHT) + 2  -- +2 buffer
+	local maxVisibleRows = math.ceil(scrollFrameHeight / constants.ACTIVITY_ROW_HEIGHT) + 2 -- +2 buffer
 	local totalHeight = #sorted * constants.ACTIVITY_ROW_HEIGHT
-	
+
 	-- Update scroll child height for proper scrollbar sizing
 	content.scrollChild:SetHeight(totalHeight)
-	
+
 	-- Create row pool (only enough for visible area)
 	if not content.rows then
 		content.rows = {}
@@ -549,7 +549,7 @@ local function UpdateActivityDisplay()
 			content.rows[i] = CreateActivityRow(content.scrollChild, i)
 		end
 	end
-	
+
 	-- Initial render of visible rows
 	UpdateVisibleRows(content)
 end
@@ -573,23 +573,23 @@ function Activity.CreateTab(parent)
 	filterButton:SetPoint("TOPLEFT", content, "TOPLEFT", 8, -4)
 	filterButton:SetSize(140, constants.ACTIVITY_FILTER_BUTTON_HEIGHT)
 	filterButton:SetDefaultText(GetTimeRangeName(state.timeRange))
-	
+
 	filterButton:SetupMenu(function(dropdown, rootDescription)
 		local function IsSelected(range)
 			return range == state.timeRange
 		end
-		
+
 		local function SetSelected(range)
 			state.timeRange = range
 			filterButton:SetDefaultText(GetTimeRangeName(range))
 			Activity.Refresh()
 		end
-		
+
 		for _, range in ipairs(filterOrder) do
 			rootDescription:CreateRadio(GetTimeRangeName(range), IsSelected, SetSelected, range)
 		end
 	end)
-	
+
 	content.filterButton = filterButton
 
 	-- "My Characters Only" checkbox
@@ -601,7 +601,7 @@ function Activity.CreateTab(parent)
 		state.showMyCharsOnly = self:GetChecked()
 		Activity.Refresh()
 	end)
-	
+
 	local myCharsLabel = myCharsCheck:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	myCharsLabel:SetPoint("LEFT", myCharsCheck, "RIGHT", 2, 0)
 	myCharsLabel:SetText(L["My Characters Only"])
@@ -670,12 +670,12 @@ function Activity.CreateTab(parent)
 
 	local scrollChild = CreateFrame("Frame", nil, scrollFrame)
 	scrollChild:SetWidth(constants.FRAME_WIDTH - constants.SCROLLBAR_WIDTH - 40)
-	scrollChild:SetHeight(1)  -- Will be updated dynamically
+	scrollChild:SetHeight(1) -- Will be updated dynamically
 	scrollFrame:SetScrollChild(scrollChild)
 	scrollFrame.scrollChild = scrollChild
 	content.scrollChild = scrollChild
 	content.scrollFrame = scrollFrame
-	
+
 	-- Update visible rows on scroll
 	scrollFrame:SetScript("OnVerticalScroll", function(self, offset)
 		ScrollFrame_OnVerticalScroll(self, offset)

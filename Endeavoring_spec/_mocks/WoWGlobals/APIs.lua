@@ -23,13 +23,23 @@ _G.GetNormalizedRealmName = _G.GetNormalizedRealmName or function()
 	return "TestRealm"
 end
 
-_G.IsInGuild = _G.IsInGuild or function() return true end
-_G.IsInGroup = _G.IsInGroup or function() return false end
-_G.IsInInstance = _G.IsInInstance or function() return false, "none" end
-_G.IsGuildLeader = _G.IsGuildLeader or function() return false end
+_G.IsInGuild = _G.IsInGuild or function()
+	return true
+end
+_G.IsInGroup = _G.IsInGroup or function()
+	return false
+end
+_G.IsInInstance = _G.IsInInstance or function()
+	return false, "none"
+end
+_G.IsGuildLeader = _G.IsGuildLeader or function()
+	return false
+end
 
 _G.C_GuildInfo = _G.C_GuildInfo or {
-	IsGuildOfficer = function() return false end,
+	IsGuildOfficer = function()
+		return false
+	end,
 }
 
 -- Party category constants
@@ -39,51 +49,86 @@ _G.LE_PARTY_CATEGORY_INSTANCE = _G.LE_PARTY_CATEGORY_INSTANCE or 2
 -- ============================================================
 -- Encoding utilities (MessageCodec)
 -- ============================================================
-_G.C_EncodingUtil = _G.C_EncodingUtil or {
-	SerializeCBOR = function(data) return "cbor_stub" end,
-	DeserializeCBOR = function(data) return {} end,
-	CompressString = function(s) return s end,
-	DecompressString = function(s) return s end,
-	EncodeBase64 = function(s) return s end,
-	DecodeBase64 = function(s) return s end,
-}
+_G.C_EncodingUtil = _G.C_EncodingUtil
+	or {
+		SerializeCBOR = function(data)
+			return "cbor_stub"
+		end,
+		DeserializeCBOR = function(data)
+			return {}
+		end,
+		CompressString = function(s)
+			return s
+		end,
+		DecompressString = function(s)
+			return s
+		end,
+		EncodeBase64 = function(s)
+			return s
+		end,
+		DecodeBase64 = function(s)
+			return s
+		end,
+	}
 
 -- ============================================================
 -- Neighborhood / Initiative APIs (NeighborhoodAPI)
 -- ============================================================
-_G.C_NeighborhoodInitiative = _G.C_NeighborhoodInitiative or {
-	GetNeighborhoodInitiativeInfo = function() return nil end,
-	IsInitiativeEnabled = function() return false end,
-	GetActiveNeighborhood = function() return nil end,
-	RequestNeighborhoodInitiativeInfo = function() end,
-	GetInitiativeActivityLogInfo = function() return nil end,
-	RequestInitiativeActivityLog = function() end,
-	GetQuestRewardHouseXp = function() return nil end,
-	SetViewingNeighborhood = function() end,
-	SetActiveNeighborhood = function() end,
-	IsViewingActiveNeighborhood = function() return false end,
-}
+_G.C_NeighborhoodInitiative = _G.C_NeighborhoodInitiative
+	or {
+		GetNeighborhoodInitiativeInfo = function()
+			return nil
+		end,
+		IsInitiativeEnabled = function()
+			return false
+		end,
+		GetActiveNeighborhood = function()
+			return nil
+		end,
+		RequestNeighborhoodInitiativeInfo = function() end,
+		GetInitiativeActivityLogInfo = function()
+			return nil
+		end,
+		RequestInitiativeActivityLog = function() end,
+		GetQuestRewardHouseXp = function()
+			return nil
+		end,
+		SetViewingNeighborhood = function() end,
+		SetActiveNeighborhood = function() end,
+		IsViewingActiveNeighborhood = function()
+			return false
+		end,
+	}
 
 -- ============================================================
 -- Housing APIs (NeighborhoodAPI)
 -- ============================================================
-_G.C_Housing = _G.C_Housing or {
-	GetPlayerOwnedHouses = function() return {} end,
-	GetCurrentNeighborhoodGUID = function() return nil end,
-}
+_G.C_Housing = _G.C_Housing
+	or {
+		GetPlayerOwnedHouses = function()
+			return {}
+		end,
+		GetCurrentNeighborhoodGUID = function()
+			return nil
+		end,
+	}
 
 -- ============================================================
 -- Quest log (QuestRewards)
 -- ============================================================
 _G.C_QuestLog = _G.C_QuestLog or {
-	GetQuestRewardCurrencyInfo = function() return nil end,
+	GetQuestRewardCurrencyInfo = function()
+		return nil
+	end,
 }
 
 -- ============================================================
 -- Quest info system (NeighborhoodAPI - House XP)
 -- ============================================================
 _G.C_QuestInfoSystem = _G.C_QuestInfoSystem or {
-	GetQuestLogRewardFavor = function() return nil end,
+	GetQuestLogRewardFavor = function()
+		return nil
+	end,
 }
 
 -- ============================================================
@@ -102,7 +147,9 @@ if not _G.Settings then
 	_G.Settings = {
 		RegisterVerticalLayoutCategory = function(name)
 			local category = {
-				GetID = function() return name end,
+				GetID = function()
+					return name
+				end,
 			}
 			local layout = {
 				AddInitializer = function() end,
@@ -111,13 +158,21 @@ if not _G.Settings then
 		end,
 		RegisterAddOnCategory = function() end,
 		OpenToCategory = function() end,
-		RegisterProxySetting = function() return {} end,
-		CreateCheckbox = function() return {} end,
-		CreateDropdown = function() return {} end,
+		RegisterProxySetting = function()
+			return {}
+		end,
+		CreateCheckbox = function()
+			return {}
+		end,
+		CreateDropdown = function()
+			return {}
+		end,
 		CreateControlTextContainer = function()
 			return {
 				Add = function() end,
-				GetData = function() return {} end,
+				GetData = function()
+					return {}
+				end,
 			}
 		end,
 		VarType = {
@@ -129,9 +184,10 @@ if not _G.Settings then
 end
 
 -- Settings initializer factories
-_G.CreateSettingsListSectionHeaderInitializer = _G.CreateSettingsListSectionHeaderInitializer or function()
-	return {}
-end
+_G.CreateSettingsListSectionHeaderInitializer = _G.CreateSettingsListSectionHeaderInitializer
+	or function()
+		return {}
+	end
 _G.CreateSettingsButtonInitializer = _G.CreateSettingsButtonInitializer or function()
 	return {}
 end

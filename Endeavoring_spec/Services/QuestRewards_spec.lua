@@ -25,7 +25,9 @@ local function SetupQuestRewards()
 	}
 
 	ns.API.GetQuestRewardHouseXp = function(questID)
-		if questID == 1001 then return 250 end
+		if questID == 1001 then
+			return 250
+		end
 		return nil
 	end
 
@@ -36,7 +38,6 @@ end
 -- Tests ------------------------------------------------------------------
 
 describe("QuestRewards", function()
-
 	-- ================================================================
 	-- GetCurrencyReward
 	-- ================================================================

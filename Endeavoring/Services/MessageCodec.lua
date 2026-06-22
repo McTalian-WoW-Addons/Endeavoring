@@ -37,24 +37,21 @@ function MessageCodec.Encode(data)
 	if not C_EncodingUtil.EncodeBase64 then
 		return nil, "C_EncodingUtil.EncodeBase64 not available"
 	end
-	
+
 	-- Step 1: Serialize to CBOR
 	local serialized = C_EncodingUtil.SerializeCBOR(data)
 	if not serialized or serialized == "" then
 		return nil, "CBOR serialization failed"
 	end
-	
+
 	-- Step 2: Compress with Deflate
-	local compressed = C_EncodingUtil.CompressString(
-		serialized,
-		Enum.CompressionMethod.Deflate,
-		Enum.CompressionLevel.OptimizeForSize
-	)
-	
+	local compressed =
+		C_EncodingUtil.CompressString(serialized, Enum.CompressionMethod.Deflate, Enum.CompressionLevel.OptimizeForSize)
+
 	if not compressed or compressed == "" then
 		return nil, "Deflate compression failed"
 	end
-	
+
 	-- Step 3: Encode as Base64 for safe transmission
 	local encoded = C_EncodingUtil.EncodeBase64(compressed)
 	if not encoded or encoded == "" then
@@ -80,34 +77,31 @@ function MessageCodec.Decode(encoded)
 	if not C_EncodingUtil.DecodeBase64 then
 		return nil, "C_EncodingUtil.DecodeBase64 not available"
 	end
-	
+
 	-- Validate we have data
 	if not encoded or encoded == "" then
 		return nil, "Empty message"
 	end
-	
+
 	-- Step 1: Decode Base64 to get compressed binary
 	local compressed = C_EncodingUtil.DecodeBase64(encoded)
 	if not compressed or compressed == "" then
 		return nil, "Base64 decoding failed"
 	end
-	
+
 	-- Step 2: Decompress to get CBOR binary
-	local decompressed = C_EncodingUtil.DecompressString(
-		compressed,
-		Enum.CompressionMethod.Deflate
-	)
-	
+	local decompressed = C_EncodingUtil.DecompressString(compressed, Enum.CompressionMethod.Deflate)
+
 	if not decompressed or decompressed == "" then
 		return nil, "Deflate decompression failed"
 	end
-	
+
 	-- Step 3: Deserialize CBOR to get Lua table
 	local data = C_EncodingUtil.DeserializeCBOR(decompressed)
 	if data == nil then
 		return nil, "CBOR deserialization failed"
 	end
-	
+
 	return data, nil
 end
 
@@ -118,7 +112,7 @@ function MessageCodec.GetStats()
 		features = {
 			cbor = (C_EncodingUtil and C_EncodingUtil.SerializeCBOR) ~= nil,
 			compression = (C_EncodingUtil and C_EncodingUtil.CompressString) ~= nil,
-		}
+		},
 	}
 end
 
