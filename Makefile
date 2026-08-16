@@ -1,4 +1,4 @@
-.PHONY: toc_check toc_update watch dev build test test-only test-cov test-file test-pattern test-ci lua_deps wbt_setup i18n_check i18n_fmt hardcode_string_check
+.PHONY: toc_check toc_update watch dev build boot_sim test test-only test-cov test-file test-pattern test-ci lua_deps wbt_setup i18n_check i18n_fmt hardcode_string_check
 
 ROCKSBIN := $(HOME)/.luarocks/bin
 WBT_REF ?= v1-beta
@@ -25,6 +25,17 @@ watch: toc_check
 
 build: toc_check
 	@wow-build-tools build -d -t "Endeavoring" -r ./.release
+
+# Simulate a client login to catch Lua load errors before a player does.
+# No Libs/ externals here (embeds.xml is commented out in the .toc), so no
+# build step is needed first -- boot-sim can follow the source tree's real
+# load order directly. Not passing -m Endeavoring_spec/_mocks/helper.lua:
+# it require("busted") transitively (nsMocks.lua), which boot-sim's
+# plain-Lua subprocess doesn't have available. Not needed either --
+# boot-sim's built-in WoW API mocks already give a clean, meaningful
+# result without it.
+boot_sim:
+	@wow-build-tools boot-sim -t "Endeavoring" --no-splash
 
 test:
 	@$(ROCKSBIN)/busted Endeavoring_spec
