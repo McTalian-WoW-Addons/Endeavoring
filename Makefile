@@ -1,7 +1,7 @@
 .PHONY: toc_check toc_update watch dev build boot_sim test test-only test-cov test-file test-pattern test-ci lua_deps wbt_setup i18n_check i18n_fmt hardcode_string_check
 
 ROCKSBIN := $(HOME)/.luarocks/bin
-WBT_REF ?= v1-beta
+WBT_REF ?= v1
 WBT_DIR := ../wow-build-tools
 
 dev: toc_check
